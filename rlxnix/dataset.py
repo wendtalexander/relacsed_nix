@@ -13,11 +13,11 @@ def scan_plugins():
     repro_map = {}
     import rlxnix.plugins
     for d in dir(rlxnix.plugins):
-        if "__" in d:
+        if "__" in d or "rlxnix" in d:
             continue
         m = import_module(f"rlxnix.plugins.{d}")
         for mc in dir(m):
-            if "__" in mc:
+            if "__" in mc or "rlxnix" in d:
                 continue
             subm = import_module(f"rlxnix.plugins.{d}.{mc}")
             members = inspect.getmembers(subm, inspect.isclass)
@@ -86,8 +86,12 @@ class Dataset(object):
     def data_trace_names(self):
         return self._data_traces
     
-    def repro_data(self, repro_name):
-        pass
+    def repro_data(self, repro_name, exact=True):
+        if exact:
+            if repro_name in self._repro_map.keys():
+                return self._repro_map[repro_name]
+        else:
+            return [self._repro_map[k] for k in self._repro_map.keys() if repro_name.lower() in k.lower()]
 
     def close(self):
         if self._nixfile.is_open():

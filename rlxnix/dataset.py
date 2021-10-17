@@ -113,7 +113,7 @@ class Dataset(object):
             list: the trace names.
         """
         return self._data_traces
-    
+
     def repro_data(self, repro_name, exact=True):
         """Returns the RePro class instances providing access to data and metadata of the repro runs.
 
@@ -127,11 +127,19 @@ class Dataset(object):
         Returns:
             list: List of RePro class instances.
         """
+        def not_found_error(name, exact):
+            raise KeyError(f"No repro run with the name {name} found with exact={exact}")
+
         if exact:
             if repro_name in self._repro_map.keys():
-                return self._repro_map[repro_name]
+                return [self._repro_map[repro_name]]
+            else:
+                not_found_error(repro_name, exact)
         else:
-            return [self._repro_map[k] for k in self._repro_map.keys() if repro_name.lower() in k.lower()]
+            data = [self._repro_map[k] for k in self._repro_map.keys() if repro_name.lower() in k.lower()]
+            if len(data) < 1:
+                not_found_error(repro_name, exact)
+            return data
 
     def close(self):
         """Close the nix file, if open. Note: Once the file is closed accessing the data via one of the repro run classes will not work!

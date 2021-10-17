@@ -18,6 +18,24 @@ class RePro(object):
         self._duration = repro_run.extent[0]
 
     @property
+    def name(self):
+        """The name of the repro run
+
+        Returns:
+            string: the name
+        """
+        return self.repro_run.name
+
+    @property
+    def type(self):
+        """The type of the repro run
+
+        Returns:
+            string: the type
+        """
+        return self.repro_run.type
+
+    @property
     def start_time(self):
         """The start time of the 
 

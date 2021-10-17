@@ -34,7 +34,19 @@ repro_class_map = scan_plugins()
 
 
 class Dataset(object):
+    """Class that represents the content of a single NIX file. All access works file attached, that is, the nix file is kept open as long as Dataset instance exists or until it was explicitely closed. 
+    Once the file is closed all access to the data will no longer be possible.
 
+    Example:
+    import rlxnix as rlx
+    
+    relacs_nix_file = "data/2021-01-01-aa.nix"
+    dset = rlx.Dataset(relacs_nix_file)
+    print(dset)
+
+    for r in dset.repros:
+       print(r)
+    """
     def __init__(self, filename) -> None:
         super().__init__()
         if not os.path.exists(filename):
@@ -77,17 +89,44 @@ class Dataset(object):
 
     @property
     def repros(self):
+        """Returns the RePros that have been run in this dataset
+
+        Returns:
+            list: RePro names.
+        """
         return list(self._repro_map.keys())
     
     @property
     def event_trace_names(self):
+        """Returns the names of the recorded event traces such as the detected spikes or other events.
+
+        Returns:
+            list: the trace names.
+        """
         return self._event_traces
 
     @property
     def data_trace_names(self):
+        """Returns the names of the recorded data traces such as the membrane potential.
+
+        Returns:
+            list: the trace names.
+        """
         return self._data_traces
     
     def repro_data(self, repro_name, exact=True):
+        """Returns the RePro class instances providing access to data and metadata of the repro runs.
+
+        Args:
+            repro_name (str): The name of the desired RePro run.
+            exact (bool, optional): If True, the name must be an exact match to the actually run RePro runs. If False, all possible matches are returned.Defaults to True.
+
+        Raises:
+            KeyError: When no match for the provided repro_name was found, a KeyError is raised.
+
+        Returns:
+            list: List of RePro class instances.
+        """
         if exact:
             if repro_name in self._repro_map.keys():
                 return self._repro_map[repro_name]
@@ -95,32 +134,57 @@ class Dataset(object):
             return [self._repro_map[k] for k in self._repro_map.keys() if repro_name.lower() in k.lower()]
 
     def close(self):
+        """Close the nix file, if open. Note: Once the file is closed accessing the data via one of the repro run classes will not work!
+        """
         if self._nixfile.is_open():
             self._nixfile.close()
         self._nixfile = None
 
     @property
     def is_open(self):
+        """Returns whether the nix file is still open.
+
+        Returns:
+            bool: True if the file is open, False otherwise.
+        """
         return self._nixfile and self._nixfile.is_open()
 
     @property
     def name(self):
+        """Returns the name of the dataset (i.e. the full filename)
+        
+        Returns:
+            str: The full filename
+        """
         return self._filename
 
     @property
     def nix_file(self):
+        """Returns the nix-file.
+        
+        Returns:
+           The nix file, if open, None otherwise.
+        """
         return self._nixfile if self.is_open else None
 
     @property
     def recording_date(self):
-        return self._nixfile.created_at if self.is_open else None
+        """The recording data of the dataset
+
+        Returns:
+            str: iso-format string of the file creation timestamp
+        """
         date = None
         if self.is_open:
             date = str(dt.datetime.fromtimestamp(self._nixfile.created_at))
         return date
 
     def __str__(self) -> str:
-        return "%s" % self._filename
+        info = "{n:s}\n\tlocation: {l:s}\n\trecording data: {rd:s}\n\tfile size {s:.2f} MB"
+        return info.format(**{"n": self.name.split(os.sep)[-1],
+                              "l": os.sep.join(self.name.split(os.sep)[:-1]),
+                              "rd": self.recording_date,
+                              "s": os.path.getsize(self._filename)/1e+6})
     
     def __repr__(self) -> str:
         return super().__repr__()

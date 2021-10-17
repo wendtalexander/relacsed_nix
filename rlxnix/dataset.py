@@ -124,3 +124,9 @@ class Dataset(object):
     
     def __repr__(self) -> str:
         return super().__repr__()
+
+    def __del__(self):
+        """make sure, the nix-file is closed.
+        """
+        if self.is_open:
+            self.close()

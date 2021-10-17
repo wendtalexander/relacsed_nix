@@ -88,7 +88,7 @@ class Dataset(object):
         self._scan_traces()
 
     @property
-    def repros(self):
+    def repros(self) -> list:
         """Returns the RePros that have been run in this dataset
 
         Returns:
@@ -97,7 +97,7 @@ class Dataset(object):
         return list(self._repro_map.keys())
     
     @property
-    def event_trace_names(self):
+    def event_trace_names(self) -> list:
         """Returns the names of the recorded event traces such as the detected spikes or other events.
 
         Returns:
@@ -106,7 +106,7 @@ class Dataset(object):
         return self._event_traces
 
     @property
-    def data_trace_names(self):
+    def data_trace_names(self) -> list:
         """Returns the names of the recorded data traces such as the membrane potential.
 
         Returns:
@@ -114,7 +114,7 @@ class Dataset(object):
         """
         return self._data_traces
 
-    def repro_data(self, repro_name, exact=True):
+    def repro_data(self, repro_name, exact=True) -> list:
         """Returns the RePro class instances providing access to data and metadata of the repro runs.
 
         Args:
@@ -149,7 +149,7 @@ class Dataset(object):
         self._nixfile = None
 
     @property
-    def is_open(self):
+    def is_open(self) -> bool:
         """Returns whether the nix file is still open.
 
         Returns:
@@ -158,7 +158,7 @@ class Dataset(object):
         return self._nixfile and self._nixfile.is_open()
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Returns the name of the dataset (i.e. the full filename)
         
         Returns:
@@ -167,7 +167,7 @@ class Dataset(object):
         return self._filename
 
     @property
-    def nix_file(self):
+    def nix_file(self) -> nixio.File:
         """Returns the nix-file.
         
         Returns:
@@ -176,7 +176,7 @@ class Dataset(object):
         return self._nixfile if self.is_open else None
 
     @property
-    def recording_date(self):
+    def recording_date(self) -> str:
         """The recording data of the dataset
 
         Returns:

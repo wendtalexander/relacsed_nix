@@ -2,6 +2,7 @@ import nixio as nix
 import os
 import inspect
 from importlib import import_module
+import datetime as dt
 
 from rlxnix.mappings import type_map
 from rlxnix.repro import RePro
@@ -113,6 +114,10 @@ class Dataset(object):
     @property
     def recording_date(self):
         return self._nixfile.created_at if self.is_open else None
+        date = None
+        if self.is_open:
+            date = str(dt.datetime.fromtimestamp(self._nixfile.created_at))
+        return date
 
     def __str__(self) -> str:
         return "%s" % self._filename

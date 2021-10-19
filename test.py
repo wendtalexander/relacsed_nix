@@ -1,12 +1,12 @@
 from IPython import embed
-
-from rlxnix.dataset import Dataset
+import matplotlib.pyplot as plt
+import rlxnix as rlx
 
 if __name__ == "__main__":
-    test_file = "data/2018-09-06-ai-invivo-1.nix"
-    test_file2 = "data/2021-07-08-ad-invivo-1.nix"
-    
-    d = Dataset(test_file2)
+    d = rlx.Dataset("/Volumes/pocketbrain/data/2021-09-03-aa-invivo-2/2021-09-03-aa-invivo-2.nix")
+    data = d.repro_data("sam", False)
+    sam = data[0]
+    data, time = sam.trace_data("V-1")
+    plt.plot(time, data)
+    plt.show()
     embed()
-    d.close()
-    

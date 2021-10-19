@@ -1,12 +1,12 @@
 import warnings
 from IPython.terminal.embed import embed
-from rlxnix.repro import RePro
+from rlxnix.repro import ReProRun
 from rlxnix.mappings import type_map
 
 import numpy as np
 
 
-class BaselineData(RePro):
+class BaselineData(ReProRun):
     _repro_name = "BaselineActivity"
 
     def __init__(self, repro_run, relacs_nix_version=1.1, spikes_trace="Spikes-1",

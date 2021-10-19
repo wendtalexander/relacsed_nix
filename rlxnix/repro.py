@@ -1,8 +1,9 @@
 from IPython.terminal.embed import embed
 import nixio
+import numpy as np
 
 
-class RePro(object):
+class ReProRun(object):
     """This class represents the data of a RePro run. It offers access to the data and metadata.
     """
 
@@ -73,7 +74,7 @@ class RePro(object):
         """
         refs = []
         for i, r in enumerate(self._repro_run.references):
-            refs.append(f"{i}: {r.name} -- {r.type}")
+            refs.append((i, r.name, r.type))
         return refs
 
     @property
@@ -85,8 +86,29 @@ class RePro(object):
         """
         features = []
         for i, feats in enumerate(self._repro_run.features):
-            features.append(f"{i}: {feats.data.name} -- {feats.data.type}")
+            features.append((i, feats.data.name, feats.data.type))
         return features
+
+    def trace_data(self, name_or_index):
+        """Get the data that was recorded while this repro was run.
+
+        Args:
+            name_or_index (str or int): name or index of the referenced data trace
+
+        Returns:
+            data (numpy array): the data 
+            time (numpy array): the respective time vector, None, if the data is an event trace
+        """
+        ref = self._repro_run.references[name_or_index]
+        time = None
+        data = ref.get_slice([self.start_time], [self.duration], nixio.DataSliceMode.Data)[:]
+        if "relacs.data.sampled" in ref.type:
+            time = np.array(ref.dimensions[0].axis(len(data), start_position=self.start_time))
+        return data, time
+
+    def feature_data(self, name_or_index):
+        feat_data = self._repro_run.feature_data(name_or_index)
+        return feat_data[:]
 
     def __str__(self) -> str:
         info = "Repro: {n:s} \t type: {t:s}\n\tstart time: {st:.2f}s\tduration: {et:.2f}s"

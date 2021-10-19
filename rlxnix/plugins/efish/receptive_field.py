@@ -1,6 +1,6 @@
-from rlxnix.repro import RePro
+from rlxnix.repro import ReProRun
 
-class ReceptiveField(RePro):
+class ReceptiveField(ReProRun):
     _repro_name = "ReceptiveField"
     
     def __init__(self, repro_run, relacs_nix_version=1.1) -> None:

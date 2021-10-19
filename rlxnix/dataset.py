@@ -4,8 +4,8 @@ import inspect
 from importlib import import_module
 import datetime as dt
 
-from rlxnix.mappings import type_map
-from rlxnix.repro import RePro
+from .mappings import type_map
+from .repro import ReProRun
 
 from IPython import embed
 
@@ -50,7 +50,7 @@ class Dataset(object):
     def __init__(self, filename) -> None:
         super().__init__()
         if not os.path.exists(filename):
-            raise ValueError("RelacsNIX cannot read file %s, does not exist!" %filename)
+            raise ValueError("RelacsNIX cannot read file %s, does not exist!" % filename)
         self._filename = filename
         self._nixfile = nix.File.open(filename, nix.FileMode.ReadOnly)
         self._block = self._nixfile.blocks[0]
@@ -77,7 +77,7 @@ class Dataset(object):
             if repro_name in repro_class_map.keys():
                 self._repro_map[tag.name] = repro_class_map[repro_name](tag, self._relacs_nix_version)
             else:
-                self._repro_map[tag.name] = RePro(tag, self._relacs_nix_version)
+                self._repro_map[tag.name] = ReProRun(tag, self._relacs_nix_version)
 
     def _scan_traces(self):
         self._event_traces = [da.name for da in self._block.data_arrays if type_map[self._relacs_nix_version]["event trace"] in da.type]
@@ -167,7 +167,7 @@ class Dataset(object):
         return self._filename
 
     @property
-    def nix_file(self) -> nixio.File:
+    def nix_file(self) -> nix.File:
         """Returns the nix-file.
         
         Returns:

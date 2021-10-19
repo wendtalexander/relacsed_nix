@@ -1,6 +1,7 @@
 from IPython.terminal.embed import embed
 import nixio
 import numpy as np
+import rlxnix.util as util
 
 
 class ReProRun(object):
@@ -109,6 +110,11 @@ class ReProRun(object):
     def feature_data(self, name_or_index):
         feat_data = self._repro_run.feature_data(name_or_index)
         return feat_data[:]
+    
+    @property
+    def metadata(self):
+        m = util.nix_metadata_to_dict(self._repro_run.metadata)
+        return m
 
     def __str__(self) -> str:
         info = "Repro: {n:s} \t type: {t:s}\n\tstart time: {st:.2f}s\tduration: {et:.2f}s"

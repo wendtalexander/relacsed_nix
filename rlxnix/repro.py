@@ -1,7 +1,6 @@
 from IPython.terminal.embed import embed
 import nixio
 import numpy as np
-import rlxnix.util as util
 
 
 class ReProRun(object):

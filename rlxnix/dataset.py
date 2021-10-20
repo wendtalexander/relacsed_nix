@@ -1,13 +1,12 @@
 import nixio as nix
 import os
-import numpy as np
 import inspect
 from importlib import import_module
 import datetime as dt
 
 from .mappings import type_map
 from .repro import ReProRun
-from .util import Timeline
+from .timeline import Timeline
 
 from IPython import embed
 
@@ -66,7 +65,9 @@ class Dataset(object):
         self._data_traces = []
         self._repro_map = {}
         self._scan_file()
-        self._timeline = Timeline(self._repro_map, self._block.multi_tags)
+    
+    def _scan_stimuli(self):
+        pass
 
     def _scan_repros(self):
         for tag in self._block.tags:
@@ -89,6 +90,8 @@ class Dataset(object):
     def _scan_file(self):
         self._scan_traces()
         self._scan_repros()
+        self._timeline = Timeline(self._repro_map, self._block.multi_tags)
+        self._scan_stimuli()
 
     @property
     def repros(self) -> list:

@@ -1,5 +1,6 @@
 from IPython.terminal.embed import embed
 import numpy as np
+from enum import Enum
 
 
 def nix_metadata_to_dict(section):
@@ -9,6 +10,11 @@ def nix_metadata_to_dict(section):
     for s in section.sections:
         info[s.name] = nix_metadata_to_dict(s)
     return info
+
+
+class IntervalMode(Enum):
+    Within = 1
+    Embracing = 2
 
 
 class Timeline(object):
@@ -80,6 +86,21 @@ class Timeline(object):
                 names.append(name)
         return names, indices
     
+    def find_repro_runs(self, interval_start, interval_stop=None, mode=IntervalMode.Embracing):
+        names = []
+        if interval_stop is None:
+            interval_stop = interval_start
+        
+        for start, stop, name in zip(self._repro_start_times, self._repro_stop_times, self._repro_names):
+            if mode == IntervalMode.Embracing:
+                if start <= interval_start and stop >= interval_stop:
+                    names.append(name)
+            else:
+                if start >= interval_start and stop <= interval_stop:
+                    names.append(name)
+    
+        return names
+
     @property
     def min_time(self):
         return self._repro_start_times[0]

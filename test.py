@@ -7,6 +7,5 @@ if __name__ == "__main__":
     data = d.repro_data("sam", False)
     sam = data[0]
     data, time = sam.trace_data("V-1")
-    plt.plot(time, data)
-    plt.show()
+
     embed()

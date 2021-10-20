@@ -24,7 +24,6 @@ class Timeline(object):
         self._stim_names = None
         self._scan_repro_times(repro_map)
         self._scan_stimulus_times(stimulus_mtags)
-        embed()
 
     def _scan_repro_times(self, repro_map):
         for i, k in enumerate(repro_map.keys()):
@@ -48,7 +47,7 @@ class Timeline(object):
         self._stim_start_times = np.zeros(total_stim_count)
         self._stim_stop_times = np.zeros_like(self._stim_start_times)
         self._stim_names = np.empty_like(self._stim_start_times, dtype=object)
-        self._stim_indices = np.zeros_like(self._stim_start_times)
+        self._stim_indices = np.zeros_like(self._stim_start_times, dtype=int)
         index = 0
         for mt in mtags:
             if "relacs.stimulus" not in mt.type:
@@ -60,10 +59,32 @@ class Timeline(object):
                 self._stim_stop_times[index] = start + ext
                 self._stim_indices[index] = i
                 self._stim_names[index] = mt.name
-                
                 index += 1
+
         ind = np.argsort(self._stim_start_times)
         self._stim_start_times = self._stim_start_times[ind]
         self._stim_stop_times = self._stim_stop_times[ind]
         self._stim_indices = self._stim_indices[ind]
         self._stim_names = self._stim_names[ind]
+
+    @property
+    def stimuli(self):
+        return self._stim_start_times, self._stim_stop_times, self._stim_indices, self._stim_names
+
+    def find_stimuli(self, interval_start, interval_stop):
+        indices = []
+        names = []
+        for start, stop, index, name in zip(self._stim_start_times, self._stim_stop_times, self._stim_indices, self._stim_names):
+            if start >= interval_start and stop < interval_stop:
+                indices.append(index)
+                names.append(name)
+        return names, indices
+    
+    @property
+    def min_time(self):
+        return self._repro_start_times[0]
+
+    @property
+    def max_time(self):
+        return self._repro_stop_times[-1]
+    

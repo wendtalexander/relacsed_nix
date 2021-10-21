@@ -75,7 +75,7 @@ class Timeline(object):
                 indices.append(index)
                 names.append(name)
         return names, indices
-    
+
     def find_repro_runs(self, interval_start, interval_stop=None, mode=IntervalMode.Embracing):
         names = []
         if interval_stop is None:

@@ -2,6 +2,8 @@ from IPython.terminal.embed import embed
 import nixio
 import numpy as np
 
+from rlxnix.stimulus import Stimulus
+
 
 class ReProRun(object):
     """This class represents the data of a RePro run. It offers access to the data and metadata.
@@ -19,6 +21,7 @@ class ReProRun(object):
         self._relacs_nix_version = relacs_nix_version
         self._start_time = repro_run.position[0]
         self._duration = repro_run.extent[0]
+        self._stimuli = []
 
     @property
     def name(self) -> str:
@@ -114,6 +117,13 @@ class ReProRun(object):
     def metadata(self):
         m = util.nix_metadata_to_dict(self._repro_run.metadata)
         return m
+
+    def add_stimulus(self, stimulus:Stimulus):
+        self._stimuli.append(stimulus)
+
+    @property
+    def stimuli(self):
+        return self._stimuli
 
     def __str__(self) -> str:
         info = "Repro: {n:s} \t type: {t:s}\n\tstart time: {st:.2f}s\tduration: {et:.2f}s"

@@ -4,6 +4,8 @@ import inspect
 from importlib import import_module
 import datetime as dt
 
+from rlxnix.stimulus import Stimulus
+
 from .mappings import type_map
 from .repro import ReProRun
 from .timeline import Timeline
@@ -65,9 +67,15 @@ class Dataset(object):
         self._data_traces = []
         self._repro_map = {}
         self._scan_file()
-    
+
     def _scan_stimuli(self):
-        pass
+        for k in self._repro_map.keys():
+            r = self._repro_map[k]
+            stim_names, stim_indices = self._timeline.find_stimuli(r.start_time, r.start_time + r.duration)
+            for name, index in zip(stim_names, stim_indices):
+                mt = self._block.multi_tags[name]
+                s = Stimulus(mt, index)
+                r.add_stimulus(s)
 
     def _scan_repros(self):
         for tag in self._block.tags:

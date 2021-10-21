@@ -6,14 +6,29 @@ from .mappings import DataType, type_map
 
 
 class TimeReference(Enum):
-    repro_start = 0
-    zero = 1
+    """Enumeration to control the time axis returned by the trace_data function.
+    Options are:
+        * ReproStart: the time axis will start at the start time of the ReproRun, respectively the stimulus start
+        * Zero: the time axis will start at zero, by subtracting the start time
+    """
+    ReproStart = 0
+    Zero = 1
 
 
 class TraceContainer(object):
+    """Superclass for classes that are based on nix Tags/MultiTags. Provides some general properties and functions for accessing the data and some basic properties.
+    """
     def __init__(self, tag_or_mtag, index=None, relacs_nix_version=1.1) -> None:
-        """[summary]
+        """Constructor of TraceContainer class.
 
+        Args:
+        ----
+            tag_or_mtag: nixio.Tag or nixio.MultiTag
+                The tags that reference the recorded data.
+            index: int
+                In the case that a MultiTag is passed and the container represent a stimulus output, an index must be provided. Defaults to None.
+            relace_nix_version: float
+                The relacs to nix mapping version, Defaults to 1.1
         """
         super().__init__()
         if isinstance(tag_or_mtag, nixio.MultiTag) and index is None:
@@ -77,7 +92,7 @@ class TraceContainer(object):
         return self._tag
 
     @property
-    def references(self) -> list:
+    def traces(self) -> list:
         """The list of referenced event and data traces
 
         Returns:
@@ -100,21 +115,28 @@ class TraceContainer(object):
             features.append((i, feats.data.name, feats.data.type))
         return features
 
-    def trace_data(self, name_or_index, reference=TimeReference.zero):
+    def trace_data(self, name_or_index, reference=TimeReference.Zero):
         """Get the data that was recorded while this repro was run.
 
-        Args:
-            name_or_index (str or int): name or index of the referenced data trace
+        Args
+        ----
+            name_or_index: (str or int)
+                name or index of the referenced data trace e.g. "V-1" for the recorded voltage
+            reference: TimeReference
+                Controls the time reference of the time axis and event times. If TimeReference.ReproStart is given all times will start after the Repro/Stimulus start. Defaults to TimeReference.Zero, i.e. all times will start at zero, the RePro/stimulus start time will be subtracted from event times and time axis.
 
-        Returns:
-            data (np.ndarray): the data 
-            time (np.ndarray): the respective time vector, None, if the data is an event trace
+        Returns
+        -------
+            data: np.ndarray
+                The recorded continuos or event data 
+            time: np.ndarray
+                The respective time vector for continuous traces, None for event traces
         """
         ref = self._tag.references[name_or_index]
         time = None
         continuous_data_type = type_map[self._mapping_version][DataType.continuous] 
         data = ref.get_slice([self.start_time], [self.duration], nixio.DataSliceMode.Data)[:]
-        start_position = self.start_time if reference is TimeReference.repro_start else 0.0
+        start_position = self.start_time if reference is TimeReference.ReproStart else 0.0
 
         if continuous_data_type in ref.type:  
             time = np.array(ref.dimensions[0].axis(len(data), start_position=start_position))

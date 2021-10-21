@@ -1,7 +1,7 @@
 import warnings
 from IPython.terminal.embed import embed
 from rlxnix.repro import ReProRun
-from rlxnix.mappings import type_map
+from rlxnix.mappings import DataType, type_map
 
 import numpy as np
 
@@ -36,7 +36,7 @@ class BaselineData(ReProRun):
                 warnings.warn("Could not load {name} event data!", UserWarning)
 
     def _scan_tag(self):
-        sampled_data = [da for da in self._repro_run.references if type_map[self._relacs_nix_version]["data trace"] in da.type]
+        sampled_data = [da for da in self.repro_tag.references if type_map[self._mapping_version][DataType.continuous] in da.type]
         self._sampling_interval = -1 if len(sampled_data) == 0 else sampled_data[0].dimensions[0].sampling_interval
         """
         if self.spikes_trace in self.repro_tag.references:

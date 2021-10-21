@@ -2,6 +2,7 @@ from IPython import embed
 import matplotlib.pyplot as plt
 import rlxnix as rlx
 import platform
+import numpy as np
 
 if __name__ == "__main__":
     if "macos" in platform.platform().lower():
@@ -9,10 +10,17 @@ if __name__ == "__main__":
     else:
         d = rlx.Dataset("/media/grewe/pocketbrain/data/2021-09-03-aa-invivo-2/2021-09-03-aa-invivo-2.nix")
     
-    data = d.repro_data("sam", False)
+    sam_runs = d.repro_data("sam", False)
     baseline_data = d.repro_data("baseline", False)[0]
-    sam = data[0]
-    data, time = sam.trace_data("V-1")
+    
+    sam = sam_runs[0]
+    sam_stim0 = sam.stimuli[0]
+    data, time = sam_stim0.trace_data("LocalEOD-1")
+    sam_spikes, _ = sam_stim0.trace_data("Spikes-1")
+    plt.plot(time, data)
+    plt.scatter(sam_spikes, np.ones_like(sam_spikes)*np.max(data), color="tab:red")
+
+
     bd, bt = baseline_data.trace_data("V-1")
     spike_times, _ = baseline_data.trace_data("Spikes-1")
     plt.plot(bt, bd)

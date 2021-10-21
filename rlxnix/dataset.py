@@ -4,9 +4,8 @@ import inspect
 from importlib import import_module
 import datetime as dt
 
-from rlxnix.stimulus import Stimulus
-
-from .mappings import type_map
+from .stimulus import Stimulus
+from .mappings import DataType, type_map
 from .repro import ReProRun
 from .timeline import Timeline
 
@@ -23,8 +22,8 @@ def scan_plugins():
         for mc in dir(m):
             if "__" in mc or "rlxnix" in d:
                 continue
-            subm = import_module(f"rlxnix.plugins.{d}.{mc}")
-            members = inspect.getmembers(subm, inspect.isclass)
+            submodule = import_module(f"rlxnix.plugins.{d}.{mc}")
+            members = inspect.getmembers(submodule, inspect.isclass)
             for _, member in members:
                 if hasattr(member, "_repro_name"):
                     repro_name = getattr(member, "_repro_name")
@@ -44,10 +43,10 @@ class Dataset(object):
     import rlxnix as rlx
     
     relacs_nix_file = "data/2021-01-01-aa.nix"
-    dset = rlx.Dataset(relacs_nix_file)
-    print(dset)
+    dataset = rlx.Dataset(relacs_nix_file)
+    print(dataset)
 
-    for r in dset.repros:
+    for r in dataset.repros:
        print(r)
     """
     def __init__(self, filename) -> None:
@@ -71,8 +70,8 @@ class Dataset(object):
     def _scan_stimuli(self):
         for k in self._repro_map.keys():
             r = self._repro_map[k]
-            stim_names, stim_indices = self._timeline.find_stimuli(r.start_time, r.start_time + r.duration)
-            for name, index in zip(stim_names, stim_indices):
+            stimulus_names, stimulus_indices = self._timeline.find_stimuli(r.start_time, r.start_time + r.duration)
+            for name, index in zip(stimulus_names, stimulus_indices):
                 mt = self._block.multi_tags[name]
                 s = Stimulus(mt, index)
                 r.add_stimulus(s)
@@ -92,8 +91,8 @@ class Dataset(object):
                 self._repro_map[tag.name] = ReProRun(tag, self._relacs_nix_version)
 
     def _scan_traces(self):
-        self._event_traces = [da.name for da in self._block.data_arrays if type_map[self._relacs_nix_version]["event trace"] in da.type]
-        self._data_traces = [da.name for da in self._block.data_arrays if type_map[self._relacs_nix_version]["data trace"] in da.type]
+        self._event_traces = [da.name for da in self._block.data_arrays if type_map[self._relacs_nix_version][DataType.event] in da.type]
+        self._data_traces = [da.name for da in self._block.data_arrays if type_map[self._relacs_nix_version][DataType.continuous] in da.type]
 
     def _scan_file(self):
         self._scan_traces()

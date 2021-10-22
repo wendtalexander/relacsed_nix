@@ -1,17 +1,44 @@
 import nixio
 
 from .trace_container import TraceContainer
-
+from .util import nix_metadata_to_dict
 
 class Stimulus(TraceContainer):
-    """[summary]
-
-    Args:
-        TraceContainer ([type]): [description]
+    """Class that represents a single stimulus segment. It provides access to the stimulus metadata and the data traces.
     """
     def __init__(self, stimulus_mtag: nixio.MultiTag, index: int, relacs_nix_version=1.1) -> None:
+        """Create an instance of the Stimulus class.
+
+        Parameters
+        ----------
+        stimulus_mtag : nixio.MultiTag
+            The MultiTag that contains the data. 
+        index : int
+            The index of the stimulation. (A MultiTag tag several segments in which the same, or similar stimulus was presented.)
+        relacs_nix_version : float, optional
+            relacs data to nix mapping version, by default 1.1
+        """        
         super().__init__(stimulus_mtag, index, relacs_nix_version=relacs_nix_version)
         self._mtag = stimulus_mtag
+
+    @property
+    def metadata(self):
+        """Returns the metadata for this stimulus. The settings herein complete and supersede the ones of the RePro. For a complete view use the ReProRun.stimulus_metadata property.
+
+        Returns:
+        --------
+            mdata: dict
+                The metadata dictionary
+        """
+        mdata = nix_metadata_to_dict(self._tag.metadata)
+        for index, name, type in self.features:
+            if "mutable" in type:
+                suffix = name.split(self.name + "_")[-1]
+                fdata = self.feature_data(index)
+                funit = self._tag.features[index].data.unit
+                if suffix in mdata[self.name]:
+                    mdata[self.name][suffix] = (fdata.ravel().tolist(), funit)
+        return mdata
 
     def __str__(self) -> str:
         name = self._mtag.name

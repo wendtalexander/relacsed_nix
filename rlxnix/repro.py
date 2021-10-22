@@ -19,6 +19,7 @@ class ReProRun(TraceContainer):
         """
         super().__init__(repro_run, relacs_nix_version=relacs_nix_version)
         self._stimuli = []
+        self._metadata = None
     
     @property
     def metadata(self):
@@ -29,8 +30,9 @@ class ReProRun(TraceContainer):
         dictionary
             The metadata dictionary
         """
-        m = nix_metadata_to_dict(self._tag.metadata)
-        return m
+        if self._metadata is None:
+            self._metadata = nix_metadata_to_dict(self._tag.metadata)
+        return self._metadata
 
     def add_stimulus(self, stimulus:Stimulus):
         """INTERNAL USE ONLY! Adds a stimulus to the list of stimuli run in the context of this RePro run.

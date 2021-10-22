@@ -20,6 +20,7 @@ class Stimulus(TraceContainer):
         """        
         super().__init__(stimulus_mtag, index, relacs_nix_version=relacs_nix_version)
         self._mtag = stimulus_mtag
+        self._metadata = None
 
     @property
     def metadata(self):
@@ -30,15 +31,20 @@ class Stimulus(TraceContainer):
             mdata: dict
                 The metadata dictionary
         """
-        mdata = nix_metadata_to_dict(self._tag.metadata)
-        for index, name, type in self.features:
-            if "mutable" in type:
-                suffix = name.split(self.name + "_")[-1]
-                fdata = self.feature_data(index)
-                funit = self._tag.features[index].data.unit
-                if suffix in mdata[self.name]:
-                    mdata[self.name][suffix] = (fdata.ravel().tolist(), funit)
-        return mdata
+        if self._metadata is None:
+            mdata = nix_metadata_to_dict(self._tag.metadata)
+            for index, name, type in self.features:
+                if "mutable" in type:
+                    suffix = name.split(self.name + "_")[-1]
+                    try:
+                        fdata = self.feature_data(index)
+                    except:
+                        continue
+                    funit = self._tag.features[index].data.unit
+                    if suffix in mdata[self.name]:
+                        mdata[self.name][suffix] = (fdata.ravel().tolist(), funit)
+            self._metadata = mdata
+        return self._metadata
 
     def __str__(self) -> str:
         name = self._mtag.name

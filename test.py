@@ -8,10 +8,10 @@ if __name__ == "__main__":
     if "macos" in platform.platform().lower():
         d = rlx.Dataset("/Volumes/pocketbrain/data/2021-09-03-aa-invivo-2/2021-09-03-aa-invivo-2.nix")
     else:
-        d = rlx.Dataset("/media/grewe/pocketbrain/data/2021-09-03-aa-invivo-2/2021-09-03-aa-invivo-2.nix")
+        d = rlx.Dataset("/media/grewe/pocketbrain/data/2021-09-03-bv-invivo-2/2021-09-03-bv-invivo-2.nix")
     
-    sam_runs = d.repro_data("sam", False)
-    baseline_data = d.repro_data("baseline", False)[0]
+    sam_runs = d.repro_runs("sam", False)
+    baseline_data = d.repro_runs("baseline", False)[0]
     
     sam = sam_runs[0]
     sam_stim0 = sam.stimuli[0]

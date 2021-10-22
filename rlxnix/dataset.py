@@ -128,7 +128,7 @@ class Dataset(object):
         """
         return self._data_traces
 
-    def repro_data(self, repro_name, exact=True) -> list:
+    def repro_runs(self, repro_name, exact=True) -> list:
         """Returns the RePro class instances providing access to data and metadata of the repro runs.
 
         Args:

@@ -1,4 +1,4 @@
-import nixio as nix
+import nixio
 import os
 import inspect
 from importlib import import_module
@@ -8,6 +8,7 @@ from .stimulus import Stimulus
 from .mappings import DataType, type_map
 from .repro import ReProRun
 from .timeline import Timeline
+from .util import nix_metadata_to_dict
 
 from IPython import embed
 
@@ -54,7 +55,7 @@ class Dataset(object):
         if not os.path.exists(filename):
             raise ValueError("RelacsNIX cannot read file %s, does not exist!" % filename)
         self._filename = filename
-        self._nixfile = nix.File.open(filename, nix.FileMode.ReadOnly)
+        self._nixfile = nixio.File.open(filename, nixio.FileMode.ReadOnly)
         self._block = self._nixfile.blocks[0]
         if "relacs-nix version" in self._block.metadata:
             self._relacs_nix_version = self._block.metadata["relacs-nix version"]
@@ -180,7 +181,7 @@ class Dataset(object):
         return self._filename
 
     @property
-    def nix_file(self) -> nix.File:
+    def nix_file(self) -> nixio.File:
         """Returns the nix-file.
         
         Returns:
@@ -199,6 +200,18 @@ class Dataset(object):
         if self.is_open:
             date = str(dt.datetime.fromtimestamp(self._nixfile.created_at))
         return date
+    
+    @property
+    def metadata(self):
+        """Get the Metadata associated with this recording. Dict entries are the respective property name as key and value is a tuple of the property's values and the unit if provided.
+
+        Returns
+        -------
+        dictionary
+            The session metadata.
+        """                
+        mdata = nix_metadata_to_dict(self._block.metadata)
+        return mdata
 
     def __str__(self) -> str:
         info = "{n:s}\n\tlocation: {l:s}\n\trecording data: {rd:s}\n\tfile size {s:.2f} MB"

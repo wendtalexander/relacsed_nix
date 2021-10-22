@@ -17,6 +17,7 @@ if __name__ == "__main__":
     sam_stim0 = sam.stimuli[0]
     data, time = sam_stim0.trace_data("LocalEOD-1")
     sam_spikes, _ = sam_stim0.trace_data("Spikes-1")
+    
     plt.plot(time, data)
     plt.scatter(sam_spikes, np.ones_like(sam_spikes)*np.max(data), color="tab:red")
 

@@ -12,7 +12,8 @@ class ReProRun(TraceContainer):
     def __init__(self, repro_run: nixio.Tag, relacs_nix_version=1.1):
         """Create a RePro instance that represent one run of a relacs RePro.
 
-        Args:
+        Parameters
+        ----------
             repro_run (nixio.Tag): the nix - tag that belong to the repro run 
             relacs_nix_version (float, optional): The mapping version number. Defaults to 1.1.
         """
@@ -21,14 +22,35 @@ class ReProRun(TraceContainer):
     
     @property
     def metadata(self):
-        m = nix_metadata_to_dict(self._repro_run.metadata)
+        """Returns the metadata for this ReProRun. The settings herein are the base settings of the RePro. They may vary for each stimulus. For a complete view use the ReProRun.stimulus_metadata property.
+
+        Returns:
+        --------
+        dictionary
+            The metadata dictionary
+        """
+        m = nix_metadata_to_dict(self._tag.metadata)
         return m
 
     def add_stimulus(self, stimulus:Stimulus):
+        """INTERNAL USE ONLY! Adds a stimulus to the list of stimuli run in the context of this RePro run.
+
+        Parameters
+        ----------
+            stimulus : rlxnix.Stimulus
+                The stimulus that was run.
+        """
         self._stimuli.append(stimulus)
 
     @property
     def stimuli(self):
+        """List of stimuli run in the context of this RePro Run.
+
+        Returns:
+        --------
+            stimulus: rlxnix.Stimulus
+                The Stimulus instance that provides access to the data during the stimulus output.
+        """
         return self._stimuli
 
     def __str__(self) -> str:

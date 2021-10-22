@@ -8,7 +8,9 @@ class IntervalMode(Enum):
 
 
 class Timeline(object):
-
+    """
+    Class that represents the timeline of the dataset. It contains the start and end times of all repro Runs and all stimulus outputs stored in the recording.
+    """
     def __init__(self, repro_map, stimulus_mtags) -> None:
         super().__init__()
         self._repro_start_times = np.zeros(len(repro_map))
@@ -65,18 +67,63 @@ class Timeline(object):
 
     @property
     def stimuli(self):
+        """Returns the stimuli that were run in chronological order. 
+
+        Returns
+        -------
+        start_times : list of float
+            The stimulus start times in seconds
+        stop_times : list of float
+            The stimulus stop times in seconds
+        stim_indices : list of int
+            The index of the stimulus in the respective MultiTag.
+        stim_names : list of str
+            The names of the respective MultiTags            
+        """        
         return self._stim_start_times, self._stim_stop_times, self._stim_indices, self._stim_names
 
     def find_stimuli(self, interval_start, interval_stop):
+        """Find the stimuli that happen in a given interval. Intervals are given in seconds. Stimuli with start times >= interval_start and stop times <= interval_stop are considered. 
+
+        Parameters
+        ----------
+        interval_start : float
+            The interval start time in seconds
+        interval_stop : float
+            The interval stop time.
+
+        Returns
+        -------
+        names : list of str
+            stimulus names
+        indices : list of int
+            Stimulus indices in the respective MultiTags.
+        """        
         indices = []
         names = []
         for start, stop, index, name in zip(self._stim_start_times, self._stim_stop_times, self._stim_indices, self._stim_names):
-            if start >= interval_start and stop < interval_stop:
+            if start >= interval_start and stop <= interval_stop:
                 indices.append(index)
                 names.append(name)
         return names, indices
 
     def find_repro_runs(self, interval_start, interval_stop=None, mode=IntervalMode.Embracing):
+        """Find the ReproRuns that happen within a given interval or that embrace a give interval.
+
+        Parameters
+        ----------
+        interval_start : float
+            start time of the considered interval
+        interval_stop : float, optional
+            stop time of the interval, if None, stop is set to start. Defaults to None
+        mode : IntervalMode, optional
+            Defines whether the ReproRun must be within the given interval or whether the ReproRun must embrace the given interval, by default IntervalMode.Embracing
+
+        Returns
+        -------
+        list of str
+            The names of the matching ReProRuns
+        """        
         names = []
         if interval_stop is None:
             interval_stop = interval_start

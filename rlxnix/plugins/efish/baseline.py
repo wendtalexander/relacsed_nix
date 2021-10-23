@@ -6,7 +6,7 @@ from rlxnix.mappings import DataType, type_map
 import numpy as np
 
 
-class BaselineData(ReProRun):
+class Baseline(ReProRun):
     _repro_name = "BaselineActivity"
 
     def __init__(self, repro_run, relacs_nix_version=1.1, spikes_trace="Spikes-1",

@@ -1,5 +1,5 @@
 import nixio
-from rlxnix.repro import ReProRun
+from ...repro import ReProRun
 
 from IPython.terminal.embed import embed
 

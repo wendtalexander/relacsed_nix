@@ -1,1 +1,1 @@
-import rlxnix.plugins.efish
+from ..plugins import efish

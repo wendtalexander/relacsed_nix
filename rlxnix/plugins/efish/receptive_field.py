@@ -1,4 +1,4 @@
-from rlxnix.repro import ReProRun
+from ...repro import ReProRun
 
 class ReceptiveField(ReProRun):
     _repro_name = "ReceptiveField"

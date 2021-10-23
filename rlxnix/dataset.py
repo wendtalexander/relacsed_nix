@@ -40,15 +40,16 @@ class Dataset(object):
     """Class that represents the content of a single NIX file. All access works file attached, that is, the nix file is kept open as long as Dataset instance exists or until it was explicitely closed. 
     Once the file is closed all access to the data will no longer be possible.
 
-    Example:
-    import rlxnix as rlx
+    .. code-block:: python
     
-    relacs_nix_file = "data/2021-01-01-aa.nix"
-    dataset = rlx.Dataset(relacs_nix_file)
-    print(dataset)
+        import rlxnix as rlx
+        
+        relacs_nix_file = "data/2021-01-01-aa.nix"
+        dataset = rlx.Dataset(relacs_nix_file)
+        print(dataset)
 
-    for r in dataset.repros:
-       print(r)
+        for r in dataset.repros:
+        print(r)
     """
     def __init__(self, filename) -> None:
         super().__init__()
@@ -194,7 +195,8 @@ class Dataset(object):
         """The recording data of the dataset
 
         Returns:
-            str: iso-format string of the file creation timestamp
+        str:
+            iso-format string of the file creation timestamp
         """
         date = None
         if self.is_open:

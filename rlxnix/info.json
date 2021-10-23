@@ -1,0 +1,10 @@
+{
+    "VERSION": "0.5",
+    "STATUS": "dev",
+    "RELEASE": "0.5_dev",
+    "AUTHOR": "Jan Grewe",
+    "COPYRIGHT": "2021, Neuroethology lab Uni Tuebingen, Jan Grewe",
+    "CONTACT": "jan.grewe@g-node.org",
+    "BRIEF": "High level API for reading relacs-flavoured NIX files (http://g-node.github.io/nix/)",
+    "HOMEPAGE": "https://github.com/relacs"
+}

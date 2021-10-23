@@ -109,7 +109,7 @@ class Dataset(object):
             list: RePro names.
         """
         return list(self._repro_map.keys())
-    
+
     @property
     def event_trace_names(self) -> list:
         """Returns the names of the recorded event traces such as the detected spikes or other events.
@@ -200,7 +200,7 @@ class Dataset(object):
         if self.is_open:
             date = str(dt.datetime.fromtimestamp(self._nixfile.created_at))
         return date
-    
+
     @property
     def metadata(self):
         """Get the Metadata associated with this recording. Dict entries are the respective property name as key and value is a tuple of the property's values and the unit if provided.
@@ -209,7 +209,7 @@ class Dataset(object):
         -------
         dictionary
             The session metadata.
-        """                
+        """
         mdata = nix_metadata_to_dict(self._block.metadata)
         return mdata
 
@@ -219,7 +219,7 @@ class Dataset(object):
                               "l": os.sep.join(self.name.split(os.sep)[:-1]),
                               "rd": self.recording_date,
                               "s": os.path.getsize(self._filename)/1e+6})
-    
+
     def __repr__(self) -> str:
         return super().__repr__()
 

@@ -1,1 +1,1 @@
-from rlxnix.plugins.efish import baseline, receptive_field, eingenmannia_chirps
+from rlxnix.plugins.efish import baseline, receptive_field, eigenmannia_chirps

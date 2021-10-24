@@ -1,6 +1,7 @@
 import numpy as np
 from enum import Enum
 
+from IPython import embed
 
 class IntervalMode(Enum):
     Within = 1
@@ -79,7 +80,7 @@ class Timeline(object):
             The index of the stimulus in the respective MultiTag.
         stim_names : list of str
             The names of the respective MultiTags            
-        """        
+        """
         return self._stim_start_times, self._stim_stop_times, self._stim_indices, self._stim_names
 
     def find_stimuli(self, interval_start, interval_stop):
@@ -94,18 +95,23 @@ class Timeline(object):
 
         Returns
         -------
-        names : list of str
+        names : np.ndarray of str
             stimulus names
-        indices : list of int
+        indices : np.ndarray of int
             Stimulus indices in the respective MultiTags.
-        """        
-        indices = []
-        names = []
-        for start, stop, index, name in zip(self._stim_start_times, self._stim_stop_times, self._stim_indices, self._stim_names):
-            if start >= interval_start and stop <= interval_stop:
-                indices.append(index)
-                names.append(name)
-        return names, indices
+        start_times : np.ndarray of float
+            Stimulus start times.
+        stop_times : np.ndarray of float
+            Stimulus stop times.
+        """
+        ind = np.where((self._stim_start_times >= interval_start) &
+                       (self._stim_stop_times <= interval_stop))
+        indices = self._stim_indices[ind]
+        names = self._stim_names[ind]
+        start_times = self._stim_start_times[ind]
+        stop_times = self._stim_stop_times[ind]
+
+        return names, indices, start_times, stop_times
 
     def find_repro_runs(self, interval_start, interval_stop=None, mode=IntervalMode.Embracing):
         """Find the ReproRuns that happen within a given interval or that embrace a give interval.
@@ -121,22 +127,24 @@ class Timeline(object):
 
         Returns
         -------
-        list of str
+        np.ndarray of str
             The names of the matching ReProRuns
-        """        
-        names = []
+        """
         if interval_stop is None:
             interval_stop = interval_start
-        
-        for start, stop, name in zip(self._repro_start_times, self._repro_stop_times, self._repro_names):
-            if mode == IntervalMode.Embracing:
-                if start <= interval_start and stop >= interval_stop:
-                    names.append(name)
-            else:
-                if start >= interval_start and stop <= interval_stop:
-                    names.append(name)
-    
+
+        if mode == IntervalMode.Embracing:
+            names = self._repro_names[(self._repro_start_times <= interval_start) &
+                                      (self._repro_stop_times >= interval_stop)]
+        else:
+            names = self._repro_names[(self._repro_start_times >= interval_start) &
+                                      (self._repro_stop_times <= interval_stop)]
+
         return names
+
+    def next_stimulus_start(self, previous_stimulus_end):
+        st = self._stim_start_times[self._stim_start_times > previous_stimulus_end]
+        return st[0] if len(st) > 0 else None
 
     @property
     def min_time(self):
@@ -145,4 +153,3 @@ class Timeline(object):
     @property
     def max_time(self):
         return self._repro_stop_times[-1]
-    

@@ -118,13 +118,13 @@ class Stimulus(TraceContainer):
                 break
         return feat
 
-    def trace_data(self, name_or_index, before=0.0, after=0.0, reference=TimeReference.Zero):
+    def trace_data(self, name, before=0.0, after=0.0, reference=TimeReference.Zero):
         """Get the data that was recorded while this stimulus was put out. With before and after, the timespan can be extended. before must not be larger than the delay, stimulus stop + after must not reach into the next stimulus start. They will be automatically adjusted.
 
         Paramters
         ---------
-        name_or_index: (str or int)
-            name or index of the referenced data trace e.g. "V-1" for the recorded voltage
+        name: str
+            name of the referenced data trace e.g. "V-1" for the recorded voltage
         before: float
             Time before segment start that should be read. Defaults to 0.0.
         after: float
@@ -149,7 +149,7 @@ class Stimulus(TraceContainer):
             logging.warning(f"stimulus.trace_data after {np.round(after, 5)} is too large! after is set to next stimulus time - stimulus stop time {np.round(self.next_stimulus_start - self.stop_time, 5)}!")
             after = self.next_stimulus_start - self.stop_time
 
-        return self._trace_data(name_or_index, before, after, reference)
+        return self._trace_data(name, before, after, reference)
 
     def __str__(self) -> str:
         name = self._mtag.name

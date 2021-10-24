@@ -10,7 +10,7 @@ from .mappings import DataType, type_map
 class TimeReference(Enum):
     """Enumeration to control the time axis returned by the trace_data function.
     Options are:
-        * Absoute: the time axis will be in absolute time
+        * Absolute: the time axis will be in absolute time
         * Zero: the time axis will is zero at segment start
     """
     Absolute = 0
@@ -145,13 +145,13 @@ class TraceContainer(object):
                 self._features.append((i, feats.data.name, feats.data.type))
         return self._features
 
-    def _trace_data(self, name_or_index, before=0.0, after=0.0, reference=TimeReference.Zero):
+    def _trace_data(self, name, before=0.0, after=0.0, reference=TimeReference.Zero):
         """Get the data that was recorded while this repro was run, the stimulus was put out.
 
         Paramters
         ---------
-        name_or_index: (str or int)
-            name or index of the referenced data trace e.g. "V-1" for the recorded voltage.
+        name: str
+            name of the referenced data trace e.g. "V-1" for the recorded voltage.
         before: float
             Time before segment start that should be read. Defaults to 0.0.
         after: float
@@ -167,27 +167,29 @@ class TraceContainer(object):
             The respective time vector for continuous traces, None for event traces
         """
         if self.stop_time < self.start_time:
-            logging.warning(f"TraceContainer._trace_data: reading trace data from {name_or_index}, slice is invalid! start_time: {self.start_time} stop_time: {self.stop_time}. Interrupted stimulus?")
+            logging.warning(f"TraceContainer._trace_data: reading trace data from {name}, slice is invalid! start_time: {self.start_time} stop_time: {self.stop_time}. Interrupted stimulus?")
             return None, None
 
-        logging.debug(f"TraceContainer._trace_data: reading trace data from {name_or_index}, with time reference {reference}")
-        ref = self._tag.references[name_or_index]
-        time = None
-        continuous_data_type = type_map[self._mapping_version][DataType.continuous]
+        logging.debug(f"TraceContainer._trace_data: reading trace data from {name}, with time reference {reference}")
+        if name not in self._tag.references or name not in self._trace_map.keys():
+            raise ValueError(f"Could not find {name} in the list of references.")
+        ref = self._trace_map[name]
+        
         segment_stop_time = self.start_time + self.duration + after
-        if continuous_data_type in ref.type:
-            max_time = self._max_times[ref.name]
-            if segment_stop_time > max_time:
-                after = max_time - self.stop_time
-                logging.warning(f"traceContainer._trace_data: segment stop time ({np.round(segment_stop_time, 5)}) is too large, beyond maximum time in trace {ref.name} ({max_time})! reduced after to {np.round(after, 5)}!")
+        
+        if ref.trace_type == DataType.continuous:
+            if segment_stop_time > ref.maximum_time:
+                after = ref.maximum_time - self.stop_time
+                logging.warning(f"traceContainer._trace_data: segment stop time ({np.round(segment_stop_time, 5)}) is too large, beyond maximum time in trace {ref.name} ({ref.maximum_time})! reduced after to {np.round(after, 5)}!")
                 segment_stop_time = self.start_time + self.duration + after
 
         logging.debug(f"TraceContainer._trace_data: get data slice from {np.round(self.start_time - before, 5)} to {np.round(segment_stop_time, 5)}")
         
-        data = ref.get_slice([self.start_time - before], [self.duration + after + before], nixio.DataSliceMode.Data)[:]
+        data = ref.data_array.get_slice([self.start_time - before], [self.duration + after + before], nixio.DataSliceMode.Data)[:]
+        time = None
 
-        if continuous_data_type in ref.type:  
-            time = np.array(ref.dimensions[0].axis(len(data)))
+        if ref.trace_type == DataType.continuous:  
+            time = np.array(ref.data_array.dimensions[0].axis(len(data)))
             if reference == TimeReference.Absolute:
                 time += (self.start_time - before)
             else:

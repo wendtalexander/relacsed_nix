@@ -59,13 +59,13 @@ class ReProRun(TraceContainer):
         """
         return self._stimuli
 
-    def trace_data(self, name_or_index, reference=TimeReference.Zero):
+    def trace_data(self, name, reference=TimeReference.Zero):
         """Get the data that was recorded while this repro was run.
 
         Paramters
         ---------
-        name_or_index: (str or int)
-            name or index of the referenced data trace e.g. "V-1" for the recorded voltage.
+        name: str
+            name of the referenced data trace e.g. "V-1" for the recorded voltage.
         reference: TimeReference
             Controls the time reference of the time axis and event times. If TimeReference.ReproStart is given all times will start after the Repro/Stimulus start. Defaults to TimeReference.Zero, i.e. all times will start at zero, the RePro/stimulus start time will be subtracted from event times and time axis.
 
@@ -76,7 +76,7 @@ class ReProRun(TraceContainer):
         time: np.ndarray
             The respective time vector for continuous traces, None for event traces
         """
-        return self._trace_data(name_or_index, reference=reference)
+        return self._trace_data(name, reference=reference)
     
     def __str__(self) -> str:
         info = "Repro: {n:s} \t type: {t:s}\n\tstart time: {st:.2f}s\tduration: {et:.2f}s"

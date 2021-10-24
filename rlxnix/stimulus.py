@@ -21,6 +21,8 @@ class Stimulus(TraceContainer):
         super().__init__(stimulus_mtag, index, relacs_nix_version=relacs_nix_version)
         self._mtag = stimulus_mtag
         self._metadata = None
+        self._absolute_starttime = None
+        self._delay = None
 
     @property
     def metadata(self):
@@ -45,6 +47,55 @@ class Stimulus(TraceContainer):
                         mdata[self.name][suffix] = (fdata.ravel().tolist(), funit)
             self._metadata = mdata
         return self._metadata
+
+    @property
+    def absolute_start_time(self) -> float:
+        """The absolute time at which the stimulus started relative to the onset of the recording. Since relacs does not necessarily store data during the whole recording period, the absoulte time will deviate from the stimulus start time.
+
+        Returns
+        -------
+        float
+            The absolute start time of the stimulus
+        """
+        if self._absolute_starttime is None:
+            feat = self._find_feature("_abs_time")
+            if feat is not None:
+                self._absolute_starttime = float(self.feature_data(feat))
+        return self._absolute_starttime
+
+    @property
+    def delay(self) -> float:
+        """The delay between beginning of data recording and the actual stimulus output. This is the maximum time one can read data from file before the stimulus onset. Reading data from before -delay relative to stimulus onset may give invalid data.
+
+        Returns
+        -------
+        float
+            The delay between acquisition start and stimulus output.
+        """ 
+        if self._delay is None:
+            feat = self._find_feature("_delay")
+            if feat is not None:
+                self._delay = float(self.feature_data(feat))
+        return self._delay
+    def _find_feature(self, feature_suffix) -> str:
+        """Find a feature with a certain suffix in the list of features.
+
+        Parameters
+        ----------
+        feature_suffix : str
+            The features suffix including the underscore, e.g. "_delay"
+
+        Returns
+        -------
+        str
+            the full name of the feature if it exists, otherwise None
+        """
+        feat = None
+        for _, f, _ in self.features:
+            if self.name + feature_suffix in f:
+                feat = f
+                break
+        return feat
 
     def __str__(self) -> str:
         name = self._mtag.name

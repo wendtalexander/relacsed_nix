@@ -94,6 +94,18 @@ class TraceContainer(object):
         return self._duration
 
     @property
+    def stop_time(self):
+        """Stop time pf the stimulus segment.
+
+        Returns
+        -------
+        float
+            The stimulus stop time.
+
+        """
+        return self.start_time + self.duration
+
+    @property
     def repro_tag(self):
         """Returns the underlying tag
 

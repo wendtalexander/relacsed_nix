@@ -20,15 +20,17 @@ class TimeReference(Enum):
 class TraceContainer(object):
     """Superclass for classes that are based on nix Tags/MultiTags. Provides some general properties and functions for accessing the data and some basic properties.
     """
-    def __init__(self, tag_or_mtag, index=None, relacs_nix_version=1.1) -> None:
+    def __init__(self, tag_or_mtag, traces, index=None, relacs_nix_version=1.1) -> None:
         """Constructor of TraceContainer class.
 
         Parameters
         ----------
         tag_or_mtag: nixio.Tag or nixio.MultiTag
             The tags that reference the recorded data.
-        index: int
-            In the case that a MultiTag is passed and the container represent a stimulus output, an index must be provided. Defaults to None.
+        traces: map of rlxnix.DataTrace
+            Map of DataTrace infos.
+        index: int, optional
+            The index in the Stimulus tag that relates to the stimulus.
         relace_nix_version: float
             The relacs to nix mapping version, Defaults to 1.1
         """
@@ -41,9 +43,7 @@ class TraceContainer(object):
         self._mapping_version = relacs_nix_version
         self._index = index
         self._features = None
-        self._trace_names = None
-        self._trace_map = {}
-        self._max_times = {}
+        self._trace_map = traces
 
         if isinstance(self._tag, nixio.MultiTag):
             self._start_time = self._tag.positions[self._index, 0][0]
@@ -51,18 +51,6 @@ class TraceContainer(object):
         else:
             self._start_time = self._tag.position[0]
             self._duration = self._tag.extent[0] if self._tag.extent else 0.0
-
-        self._scan_traces()
-
-    def _scan_traces(self):
-        # FIXME it is actually stupid to do it for every trace container... extract class of its own, create ind dataset and pass it to all reproRuns and stimuli.
-        continuous_data_type = type_map[self._mapping_version][DataType.continuous]
-        self._trace_names = []
-        for i, r in enumerate(self._tag.references):
-            self._trace_names.append((i, r.name, r.type))
-            self._trace_map[r.name] = r
-            if continuous_data_type in r.type:
-                self._max_times[r.name] = r.shape[0] * r.dimensions[0].sampling_interval
 
     @property
     def name(self) -> str:
@@ -140,7 +128,7 @@ class TraceContainer(object):
             List: index, name and type of the references
         """
         
-        return self._trace_names
+        return list(self._trace_map.keys())
 
     @property
     def features(self) -> list:

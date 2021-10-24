@@ -9,18 +9,22 @@ class ReProRun(TraceContainer):
     """This class represents the data of a RePro run. It offers access to the data and metadata.
     """
 
-    def __init__(self, repro_run: nixio.Tag, relacs_nix_version=1.1):
+    def __init__(self, repro_run: nixio.Tag, traces, relacs_nix_version=1.1):
         """Create a RePro instance that represent one run of a relacs RePro.
 
         Parameters
         ----------
-            repro_run (nixio.Tag): the nix - tag that belong to the repro run 
-            relacs_nix_version (float, optional): The mapping version number. Defaults to 1.1.
+        repro_run:  nixio.Tag
+            the nix - tag that represents the repro run 
+        traces: dict of rlxnix.DataTrace
+            Dict of trace infos.
+        relacs_nix_version:  float
+            The mapping version number. Defaults to 1.1.
         """
-        super().__init__(repro_run, relacs_nix_version=relacs_nix_version)
+        super().__init__(repro_run, traces, relacs_nix_version=relacs_nix_version)
         self._stimuli = []
         self._metadata = None
-    
+
     @property
     def metadata(self):
         """Returns the metadata for this ReProRun. The settings herein are the base settings of the RePro. They may vary for each stimulus. For a complete view use the ReProRun.stimulus_metadata property.

@@ -8,8 +8,8 @@ from .util import nix_metadata_to_dict
 class Stimulus(TraceContainer):
     """Class that represents a single stimulus segment. It provides access to the stimulus metadata and the data traces.
     """
-    def __init__(self, stimulus_mtag: nixio.MultiTag, index: int, next_stimulus_start=None,
-                 relacs_nix_version=1.1) -> None:
+    def __init__(self, stimulus_mtag: nixio.MultiTag, index: int, traces, 
+                 next_stimulus_start=None, relacs_nix_version=1.1) -> None:
         """Create an instance of the Stimulus class.
 
         Parameters
@@ -18,12 +18,14 @@ class Stimulus(TraceContainer):
             The MultiTag that contains the data. 
         index : int
             The index of the stimulation. (A MultiTag tag several segments in which the same, or similar stimulus was presented.)
+        traces: dict of rlxnix.DataTrace
+            Dict of trace infos.
         next_stimulus_start: float
             The start time of the next stimulus, defaults to None.
         relacs_nix_version : float, optional
             relacs data to nix mapping version, by default 1.1
         """
-        super().__init__(stimulus_mtag, index, relacs_nix_version=relacs_nix_version)
+        super().__init__(stimulus_mtag, index, traces, relacs_nix_version=relacs_nix_version)
         self._mtag = stimulus_mtag
         self._metadata = None
         self._absolute_starttime = None

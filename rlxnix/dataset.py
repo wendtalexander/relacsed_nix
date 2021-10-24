@@ -11,6 +11,7 @@ from .mappings import DataType, type_map
 from .repro import ReProRun
 from .timeline import Timeline
 from .util import nix_metadata_to_dict
+from .data_trace import DataTrace
 
 from IPython import embed
 
@@ -70,6 +71,7 @@ class Dataset(object):
         self._repro_runs = []
         self._event_traces = []
         self._data_traces = []
+        self._trace_map = {}
         self._repro_map = {}
         self._scan_file()
 
@@ -82,7 +84,7 @@ class Dataset(object):
             for name, index, stop in zip(stimulus_names, stimulus_indices, stimulus_stops):
                 mt = self._block.multi_tags[name]
                 next_stimulus_start = self._timeline.next_stimulus_start(stop)
-                s = Stimulus(mt, index, next_stimulus_start, self._relacs_nix_version)
+                s = Stimulus(mt, self._trace_map, index, next_stimulus_start, self._relacs_nix_version)
                 r.add_stimulus(s)
 
     def _scan_repros(self):
@@ -97,11 +99,22 @@ class Dataset(object):
             if repro_name in repro_class_map.keys():
                 self._repro_map[tag.name] = repro_class_map[repro_name](tag, self._relacs_nix_version)
             else:
-                self._repro_map[tag.name] = ReProRun(tag, self._relacs_nix_version)
+                self._repro_map[tag.name] = ReProRun(tag, self._trace_map, 
+                                                     self._relacs_nix_version)
 
     def _scan_traces(self):
-        self._event_traces = [da.name for da in self._block.data_arrays if type_map[self._relacs_nix_version][DataType.event] in da.type]
-        self._data_traces = [da.name for da in self._block.data_arrays if type_map[self._relacs_nix_version][DataType.continuous] in da.type]
+        event_type = type_map[self._relacs_nix_version][DataType.event]
+        continuous_type = type_map[self._relacs_nix_version][DataType.continuous]
+
+        for da in self._block.data_arrays:
+            if event_type in da.type:
+                self._event_traces.append(DataTrace(da, self._relacs_nix_version))
+                self._trace_map[self.event_traces[-1].name] = self._event_traces[-1]
+            elif continuous_type in da.type:
+                self._data_traces.append(DataTrace(da, self._relacs_nix_version))
+                self._trace_map[self.data_traces[-1].name] = self._data_traces[-1]
+            else:
+                continue
 
     def _scan_file(self):
         logging.info(f"Scanning file {self.name}")
@@ -124,20 +137,20 @@ class Dataset(object):
         return list(self._repro_map.keys())
 
     @property
-    def event_trace_names(self) -> list:
+    def event_traces(self) -> list:
         """Returns the names of the recorded event traces such as the detected spikes or other events.
 
         Returns:
-            list: the trace names.
+            list: the trace rlxnix.DataTrace instances.
         """
         return self._event_traces
 
     @property
-    def data_trace_names(self) -> list:
+    def data_traces(self) -> list:
         """Returns the names of the recorded data traces such as the membrane potential.
 
         Returns:
-            list: the trace names.
+            list: the rlxnix.DataTrace instances.
         """
         return self._data_traces
 

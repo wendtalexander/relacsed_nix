@@ -54,6 +54,7 @@ class Timeline(object):
             for i in range(mt.positions.shape[0]):
                 start = mt.positions[i, 0]
                 ext = mt.extents[i, 0] if mt.positions else 0.0
+
                 self._stim_start_times[index] = start
                 self._stim_stop_times[index] = start + ext
                 self._stim_indices[index] = i

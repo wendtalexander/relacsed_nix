@@ -10,10 +10,10 @@ from .mappings import DataType, type_map
 class TimeReference(Enum):
     """Enumeration to control the time axis returned by the trace_data function.
     Options are:
-        * ReproStart: the time axis will start at the start time of the ReproRun, respectively the stimulus start
-        * Zero: the time axis will start at zero, by subtracting the start time
+        * Absoute: the time axis will be in absolute time
+        * Zero: the time axis will is zero at segment start
     """
-    ReproStart = 0
+    Absolute = 0
     Zero = 1
 
 
@@ -139,10 +139,8 @@ class TraceContainer(object):
         -------
             List: index, name and type of the references
         """
-        refs = []
-        for i, r in enumerate(self._tag.references):
-            refs.append((i, r.name, r.type))
-        return refs
+        
+        return self._trace_names
 
     @property
     def features(self) -> list:
@@ -159,15 +157,19 @@ class TraceContainer(object):
                 self._features.append((i, feats.data.name, feats.data.type))
         return self._features
 
-    def trace_data(self, name_or_index, reference=TimeReference.Zero):
-        """Get the data that was recorded while this repro was run.
+    def _trace_data(self, name_or_index, before=0.0, after=0.0, reference=TimeReference.Zero):
+        """Get the data that was recorded while this repro was run, the stimulus was put out.
 
         Paramters
         ---------
         name_or_index: (str or int)
-            name or index of the referenced data trace e.g. "V-1" for the recorded voltage
+            name or index of the referenced data trace e.g. "V-1" for the recorded voltage.
+        before: float
+            Time before segment start that should be read. Defaults to 0.0.
+        after: float
+            Additional time after segment stop. Defaults t0 0.0
         reference: TimeReference
-            Controls the time reference of the time axis and event times. If TimeReference.ReproStart is given all times will start after the Repro/Stimulus start. Defaults to TimeReference.Zero, i.e. all times will start at zero, the RePro/stimulus start time will be subtracted from event times and time axis.
+            Controls the time reference of the time axis and event times. If TimeReference.Absolute is given all times will be in absolute data time. Defaults to TimeReference.Zero, i.e. segment start will be set to zero.
 
         Returns
         -------
@@ -176,18 +178,34 @@ class TraceContainer(object):
         time: np.ndarray
             The respective time vector for continuous traces, None for event traces
         """
-        logging.debug(f"reading trace data from {name_or_index}, with time reference {reference}")
+        if self.stop_time < self.start_time:
+            logging.warning(f"TraceContainer._trace_data: reading trace data from {name_or_index}, slice is invalid! start_time: {self.start_time} stop_time: {self.stop_time}. Interrupted stimulus?")
+            return None, None
+
+        logging.debug(f"TraceContainer._trace_data: reading trace data from {name_or_index}, with time reference {reference}")
         ref = self._tag.references[name_or_index]
         time = None
         continuous_data_type = type_map[self._mapping_version][DataType.continuous]
-        logging.debug(f"get data slice from {self.start_time} to {self.start_time + self.duration}")
-        data = ref.get_slice([self.start_time], [self.duration], nixio.DataSliceMode.Data)[:]
-        start_position = self.start_time if reference is TimeReference.ReproStart else 0.0
+        segment_stop_time = self.start_time + self.duration + after
+        if continuous_data_type in ref.type:
+            max_time = self._max_times[ref.name]
+            if segment_stop_time > max_time:
+                after = max_time - self.stop_time
+                logging.warning(f"traceContainer._trace_data: segment stop time ({np.round(segment_stop_time, 5)}) is too large, beyond maximum time in trace {ref.name} ({max_time})! reduced after to {np.round(after, 5)}!")
+                segment_stop_time = self.start_time + self.duration + after
+
+        logging.debug(f"TraceContainer._trace_data: get data slice from {np.round(self.start_time - before, 5)} to {np.round(segment_stop_time, 5)}")
+        
+        data = ref.get_slice([self.start_time - before], [self.duration + after + before], nixio.DataSliceMode.Data)[:]
 
         if continuous_data_type in ref.type:  
-            time = np.array(ref.dimensions[0].axis(len(data), start_position=start_position))
+            time = np.array(ref.dimensions[0].axis(len(data)))
+            if reference == TimeReference.Absolute:
+                time += (self.start_time - before)
+            else:
+                time -= before
         else:  # event data
-            data -= self.start_time
+            data -=  0.0 if reference is TimeReference.Absolute else self.start_time
         return data, time
 
     def feature_data(self, name_or_index):

@@ -1,4 +1,5 @@
 from setuptools import setup
+from tqdm.std import tqdm
 
 NAME = "rlxnix"
 VERSION = 0.5
@@ -15,7 +16,7 @@ packages = [
     "rlxnix",
 ]
 
-install_req = ["nixio", "pandas", "matplotlib", "numpy"]
+install_req = ["nixio", "pandas", "matplotlib", "numpy", "tqdm"]
 
 setup(
     name=NAME,

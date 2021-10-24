@@ -6,7 +6,8 @@ from .util import nix_metadata_to_dict
 class Stimulus(TraceContainer):
     """Class that represents a single stimulus segment. It provides access to the stimulus metadata and the data traces.
     """
-    def __init__(self, stimulus_mtag: nixio.MultiTag, index: int, relacs_nix_version=1.1) -> None:
+    def __init__(self, stimulus_mtag: nixio.MultiTag, index: int, next_stimulus_start=None,
+                 relacs_nix_version=1.1) -> None:
         """Create an instance of the Stimulus class.
 
         Parameters
@@ -15,14 +16,17 @@ class Stimulus(TraceContainer):
             The MultiTag that contains the data. 
         index : int
             The index of the stimulation. (A MultiTag tag several segments in which the same, or similar stimulus was presented.)
+        next_stimulus_start: float
+            The start time of the next stimulus, defaults to None.
         relacs_nix_version : float, optional
             relacs data to nix mapping version, by default 1.1
-        """        
+        """
         super().__init__(stimulus_mtag, index, relacs_nix_version=relacs_nix_version)
         self._mtag = stimulus_mtag
         self._metadata = None
         self._absolute_starttime = None
         self._delay = None
+        self._next_stimulus_start = next_stimulus_start
 
     @property
     def metadata(self):
@@ -77,6 +81,18 @@ class Stimulus(TraceContainer):
             if feat is not None:
                 self._delay = float(self.feature_data(feat))
         return self._delay
+
+    @property
+    def next_stimulus_start(self) -> float:
+        """Returns the start time of the next stimulus output, if any.
+
+        Returns
+        -------
+        float
+            The next stimulus start time (in data time), or None, if no stimulus is following.
+        """
+        return self._next_stimulus_start
+
     def _find_feature(self, feature_suffix) -> str:
         """Find a feature with a certain suffix in the list of features.
 

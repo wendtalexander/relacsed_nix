@@ -41,6 +41,9 @@ class TraceContainer(object):
         self._mapping_version = relacs_nix_version
         self._index = index
         self._features = None
+        self._trace_names = None
+        self._trace_map = {}
+        self._max_times = {}
 
         if isinstance(self._tag, nixio.MultiTag):
             self._start_time = self._tag.positions[self._index, 0][0]
@@ -48,6 +51,18 @@ class TraceContainer(object):
         else:
             self._start_time = self._tag.position[0]
             self._duration = self._tag.extent[0] if self._tag.extent else 0.0
+
+        self._scan_traces()
+
+    def _scan_traces(self):
+        # FIXME it is actually stupid to do it for every trace container... extract class of its own, create ind dataset and pass it to all reproRuns and stimuli.
+        continuous_data_type = type_map[self._mapping_version][DataType.continuous]
+        self._trace_names = []
+        for i, r in enumerate(self._tag.references):
+            self._trace_names.append((i, r.name, r.type))
+            self._trace_map[r.name] = r
+            if continuous_data_type in r.type:
+                self._max_times[r.name] = r.shape[0] * r.dimensions[0].sampling_interval
 
     @property
     def name(self) -> str:

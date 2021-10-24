@@ -1,6 +1,8 @@
+from inspect import trace
 import nixio
 import numpy as np
 from enum import Enum
+import logging
 
 from .mappings import DataType, type_map
 
@@ -32,6 +34,7 @@ class TraceContainer(object):
         """
         super().__init__()
         if isinstance(tag_or_mtag, nixio.MultiTag) and index is None:
+            logging.error("Index must not be None, if a multiTag is passed!")
             raise ValueError("Index must not be None, if a multiTag is passed!")
 
         self._tag = tag_or_mtag
@@ -124,10 +127,9 @@ class TraceContainer(object):
             index, name and type of t
         """
         if self._features is None:
-            features = []
+            self._features = []
             for i, feats in enumerate(self._tag.features):
-                features.append((i, feats.data.name, feats.data.type))
-            self._features = features
+                self._features.append((i, feats.data.name, feats.data.type))
         return self._features
 
     def trace_data(self, name_or_index, reference=TimeReference.Zero):
@@ -147,9 +149,11 @@ class TraceContainer(object):
         time: np.ndarray
             The respective time vector for continuous traces, None for event traces
         """
+        logging.debug(f"reading trace data from {name_or_index}, with time reference {reference}")
         ref = self._tag.references[name_or_index]
         time = None
-        continuous_data_type = type_map[self._mapping_version][DataType.continuous] 
+        continuous_data_type = type_map[self._mapping_version][DataType.continuous]
+        logging.debug(f"get data slice from {self.start_time} to {self.start_time + self.duration}")
         data = ref.get_slice([self.start_time], [self.duration], nixio.DataSliceMode.Data)[:]
         start_position = self.start_time if reference is TimeReference.ReproStart else 0.0
 
@@ -176,10 +180,12 @@ class TraceContainer(object):
         ------
         ValueError
             If this container is a Stimulus and there is no position index stored, a ValueError is raised, should never happen.
-        """        
+        """
         if isinstance(self._tag, nixio.MultiTag) and self._index is not None:
+            logging.debug(f"reading feature data from {name_or_index} with index {self._index}")
             feat_data = self._tag.feature_data(self._index, name_or_index)
         elif isinstance(self._tag, nixio.Tag):    
+            logging.debug(f"reading feature data from {name_or_index}")
             feat_data = self._tag.feature_data(name_or_index)
         else:
             raise ValueError(f"TraceContainer, feature_data: something went wrong, no Index? Tag: {self._tag}, Index:{self._index}")

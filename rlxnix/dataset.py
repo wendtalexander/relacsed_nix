@@ -3,6 +3,8 @@ import os
 import inspect
 from importlib import import_module
 import datetime as dt
+import logging
+from tqdm import tqdm
 
 from .stimulus import Stimulus
 from .mappings import DataType, type_map
@@ -54,12 +56,14 @@ class Dataset(object):
     def __init__(self, filename) -> None:
         super().__init__()
         if not os.path.exists(filename):
+            logging.error("rlxnix cannot read file %s, does not exist!" % filename)
             raise ValueError("RelacsNIX cannot read file %s, does not exist!" % filename)
         self._filename = filename
         self._nixfile = nixio.File.open(filename, nixio.FileMode.ReadOnly)
         self._block = self._nixfile.blocks[0]
         if "relacs-nix version" in self._block.metadata:
             self._relacs_nix_version = self._block.metadata["relacs-nix version"]
+            logging.info(f"Relacs nix version is {self._relacs_nix_version}")
         else:
             self._relacs_nix_version = 1.0
         self._baseline_data = []
@@ -70,16 +74,19 @@ class Dataset(object):
         self._scan_file()
 
     def _scan_stimuli(self):
-        for k in self._repro_map.keys():
+        for k in tqdm(self._repro_map.keys(), disable=not(logging.root.level == logging.INFO)):
             r = self._repro_map[k]
-            stimulus_names, stimulus_indices = self._timeline.find_stimuli(r.start_time, r.start_time + r.duration)
-            for name, index in zip(stimulus_names, stimulus_indices):
+            stimulus_start = r.start_time
+            stimulus_stop = r.start_time + r.duration
+            stimulus_names, stimulus_indices, _, stimulus_stops = self._timeline.find_stimuli(stimulus_start, stimulus_stop)
+            for name, index, stop in zip(stimulus_names, stimulus_indices, stimulus_stops):
                 mt = self._block.multi_tags[name]
-                s = Stimulus(mt, index)
+                next_stimulus_start = self._timeline.next_stimulus_start(stop)
+                s = Stimulus(mt, index, next_stimulus_start, self._relacs_nix_version)
                 r.add_stimulus(s)
 
     def _scan_repros(self):
-        for tag in self._block.tags:
+        for tag in tqdm(self._block.tags, disable=not(logging.root.level == logging.INFO)):
             if "relacs.repro_run" not in tag.type:
                 continue
             p = tag.metadata.sections[0]["RePro"]
@@ -97,10 +104,15 @@ class Dataset(object):
         self._data_traces = [da.name for da in self._block.data_arrays if type_map[self._relacs_nix_version][DataType.continuous] in da.type]
 
     def _scan_file(self):
+        logging.info(f"Scanning file {self.name}")
         self._scan_traces()
+        logging.info("Searching repro runs...")
         self._scan_repros()
+        logging.info(f"Creating timeline ...")
         self._timeline = Timeline(self._repro_map, self._block.multi_tags)
+        logging.info("Sorting stimuli...")
         self._scan_stimuli()
+        logging.info("...done")
 
     @property
     def repros(self) -> list:

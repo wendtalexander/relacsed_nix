@@ -3,14 +3,17 @@ import matplotlib.pyplot as plt
 import rlxnix as rlx
 import platform
 import numpy as np
+import logging
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.WARNING)
+  
     if "macos" in platform.platform().lower():
         # d = rlx.Dataset("/Volumes/pocketbrain/data/2021-09-03-aa-invivo-2/2021-09-03-aa-invivo-2.nix")
         d = rlx.Dataset("data/2021-07-08-ad-invivo-1.nix")
     else:
         d = rlx.Dataset("/media/grewe/pocketbrain/data/2021-09-03-bv-invivo-2/2021-09-03-bv-invivo-2.nix")
-    
+
     embed()
     exit()
     sam_runs = d.repro_runs("sam", False)

@@ -1,6 +1,8 @@
 import nixio
+import logging
+import numpy as np
 
-from .trace_container import TraceContainer
+from .trace_container import TraceContainer, TimeReference
 from .util import nix_metadata_to_dict
 
 class Stimulus(TraceContainer):
@@ -27,6 +29,7 @@ class Stimulus(TraceContainer):
         self._absolute_starttime = None
         self._delay = None
         self._next_stimulus_start = next_stimulus_start
+        logging.info(self.__str__())
 
     @property
     def metadata(self):
@@ -54,7 +57,7 @@ class Stimulus(TraceContainer):
 
     @property
     def absolute_start_time(self) -> float:
-        """The absolute time at which the stimulus started relative to the onset of the recording. Since relacs does not necessarily store data during the whole recording period, the absoulte time will deviate from the stimulus start time.
+        """The absolute time at which the stimulus started relative to the onset of the recording. Since relacs does not necessarily store data during the whole recording period, the absolute time will deviate from the stimulus start time.
 
         Returns
         -------
@@ -112,6 +115,39 @@ class Stimulus(TraceContainer):
                 feat = f
                 break
         return feat
+
+    def trace_data(self, name_or_index, before=0.0, after=0.0, reference=TimeReference.Zero):
+        """Get the data that was recorded while this stimulus was put out. With before and after, the timespan can be extended. before must not be larger than the delay, stimulus stop + after must not reach into the next stimulus start. They will be automatically adjusted.
+
+        Paramters
+        ---------
+        name_or_index: (str or int)
+            name or index of the referenced data trace e.g. "V-1" for the recorded voltage
+        before: float
+            Time before segment start that should be read. Defaults to 0.0.
+        after: float
+            Additional time after segment stop. Defaults to 0.0.
+        reference: TimeReference
+            Controls the time reference of the time axis and event times. If TimeReference.ReproStart is given all times will start after the Repro/Stimulus start. Defaults to TimeReference.Zero, i.e. all times will start at zero, the RePro/stimulus start time will be subtracted from event times and time axis.
+
+        Returns
+        -------
+        data: np.ndarray
+            The recorded continuos or event data 
+        time: np.ndarray
+            The respective time vector for continuous traces, None for event traces
+        """
+        if before > 0.0 and before > self.delay:
+            logging.warning(f"stimulus.trace_data before {before} is larger than delay {self.delay}, before is set to delay!")
+            before = self.delay
+        if self.next_stimulus_start is None:
+            logging.warning(f"stimulus.trace_data after {after} is too large! There is no next stimulus, after is set to zero!")
+            after = 0.0
+        if after > 0.0 and after > (self.next_stimulus_start - (self.stop_time)):
+            logging.warning(f"stimulus.trace_data after {np.round(after, 5)} is too large! after is set to next stimulus time - stimulus stop time {np.round(self.next_stimulus_start - self.stop_time, 5)}!")
+            after = self.next_stimulus_start - self.stop_time
+
+        return self._trace_data(name_or_index, before, after, reference)
 
     def __str__(self) -> str:
         name = self._mtag.name

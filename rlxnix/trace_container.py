@@ -36,8 +36,9 @@ class TraceContainer(object):
 
         self._tag = tag_or_mtag
         self._mapping_version = relacs_nix_version
-        self._index = index 
-        
+        self._index = index
+        self._features = None
+
         if isinstance(self._tag, nixio.MultiTag):
             self._start_time = self._tag.positions[self._index, 0][0]
             self._duration = self._tag.extents[self._index, 0][0] if self._tag.extents else 0.0
@@ -69,7 +70,7 @@ class TraceContainer(object):
 
     @property
     def start_time(self) -> float:
-        """The start time of the 
+        """The start time of the repro run or the stimulus output. The stimulus time is given in "data time", that is the amount of time in which data was dumped to file.
 
         Returns
         -------
@@ -122,10 +123,12 @@ class TraceContainer(object):
         list of tuples
             index, name and type of t
         """
-        features = []
-        for i, feats in enumerate(self._tag.features):
-            features.append((i, feats.data.name, feats.data.type))
-        return features
+        if self._features is None:
+            features = []
+            for i, feats in enumerate(self._tag.features):
+                features.append((i, feats.data.name, feats.data.type))
+            self._features = features
+        return self._features
 
     def trace_data(self, name_or_index, reference=TimeReference.Zero):
         """Get the data that was recorded while this repro was run.

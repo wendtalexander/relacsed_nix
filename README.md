@@ -28,7 +28,7 @@ print(dataset.repros)
 baseline = dataset.repro_runs("BaselineActivity-1")[0]  # needs the exact name, returns a list
 print(type(baseline))   # rlxnix.plugins.efish.baseline.Baseline
 print(baseline.metadata)  # prints the metadata dict
-base_spikes = baseline.spikes()  # returns the spike times in seconds
+base_spikes = baseline.spikes  # returns the spike times in seconds
 
 # The SAM repro has been run several times, so far there is no SAM ReProRun class
 sam_runs = dataset.repro_runs("sam", exact=False)
@@ -49,4 +49,4 @@ plt.show()
 
 **relacs** plugins implement/inherit the RePro interface. Here we follow a similar approach and **rlxnix** has a plugin sub-package that in turn contains plugin sets (e.g. efish) which contains several classes that each represent and offer some convenience for accessing the data recorded during the run of a specific RePro, e.g. the *Baseline* repro.
 
-These classes inherit from rlxnix.ReProRun. If you write your own repro class it has to inherit from **ReProRun** and must have a class member ``_repro_name`` that matches the name of the **relacss** repro it represents. It must further be added to the import statement(s) in the __init.py__ (e.g.: rlxnix/plugins/efish/__init.py__). If you add your own pluginset this has to be added to the plugins/__init.py__ file. Otherwise the classes will not be automatically detected.
+These classes inherit from rlxnix.ReProRun. If you write your own repro class it has to inherit from **ReProRun** and must have a class member ``_repro_name`` that matches the name of the **relacss** repro it represents. It must further be added to the import statement(s) in the \__init.py\__ (e.g.: rlxnix/plugins/efish/\__init.py\__). If you add your own pluginset this has to be added to the plugins/\__init.py\__ file. Otherwise the classes will not be automatically detected.

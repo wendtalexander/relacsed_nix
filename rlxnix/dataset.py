@@ -97,7 +97,7 @@ class Dataset(object):
             else:
                 repro_name = str(p)
             if repro_name in repro_class_map.keys():
-                self._repro_map[tag.name] = repro_class_map[repro_name](tag, self._relacs_nix_version)
+                self._repro_map[tag.name] = repro_class_map[repro_name](tag, self._trace_map, self._relacs_nix_version)
             else:
                 self._repro_map[tag.name] = ReProRun(tag, self._trace_map, 
                                                      self._relacs_nix_version)

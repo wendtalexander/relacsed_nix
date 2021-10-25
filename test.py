@@ -14,8 +14,6 @@ if __name__ == "__main__":
     else:
         d = rlx.Dataset("/media/grewe/pocketbrain/data/2021-09-03-bv-invivo-2/2021-09-03-bv-invivo-2.nix")
 
-    embed()
-    exit()
     sam_runs = d.repro_runs("sam", False)
     baseline_data = d.repro_runs("baseline", False)[0]
     

@@ -7,8 +7,8 @@ from IPython.terminal.embed import embed
 class EigenmanniaChirps(ReProRun):
     _repro_name = "EigenmanniaChirps"
 
-    def __init__(self, repro_run: nixio.Tag, relacs_nix_version=1.1):
-        super().__init__(repro_run, relacs_nix_version=relacs_nix_version)
+    def __init__(self, repro_run: nixio.Tag, traces, relacs_nix_version=1.1):
+        super().__init__(repro_run, traces, relacs_nix_version=relacs_nix_version)
     
     def _check_stimulus(self, stimulus_index):
         if stimulus_index >= len(self.stimuli) or stimulus_index < 0:

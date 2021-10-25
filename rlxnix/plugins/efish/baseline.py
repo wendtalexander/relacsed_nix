@@ -11,9 +11,9 @@ from IPython.terminal.embed import embed
 class Baseline(ReProRun):
     _repro_name = "BaselineActivity"
 
-    def __init__(self, repro_run, relacs_nix_version=1.1, spikes_trace="Spikes-1",
+    def __init__(self, repro_run, traces, relacs_nix_version=1.1, spikes_trace="Spikes-1",
                  eod_trace="EOD", eod_event_trace="EOD_events") -> None:
-        super().__init__(repro_run, relacs_nix_version)
+        super().__init__(repro_run, traces, relacs_nix_version)
         self._spikes = None
         self._local_eod = None
         self._global_eod = None

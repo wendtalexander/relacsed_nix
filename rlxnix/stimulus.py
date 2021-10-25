@@ -139,7 +139,11 @@ class Stimulus(TraceContainer):
         time: np.ndarray
             The respective time vector for continuous traces, None for event traces
         """
-        if before > 0.0 and before > self.delay:
+        if not isinstance(before, float) or not isinstance(after, float):
+            logging.error(f"Type of args before and after must be float, got {type(before)} and {type(after)}!")
+            return None, None
+
+        if (before > 0.0) and (before > self.delay):
             logging.warning(f"stimulus.trace_data before {before} is larger than delay {self.delay}, before is set to delay!")
             before = self.delay
         if self.next_stimulus_start is None:

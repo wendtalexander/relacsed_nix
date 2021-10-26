@@ -19,6 +19,8 @@ if __name__ == "__main__":
     
     sam = sam_runs[0]
     sam_stim0 = sam.stimuli[0]
+    print(sam_stim0.id)
+    print(sam_stim0.repro_tag_id)
     data, time = sam_stim0.trace_data("LocalEOD-1")
     sam_spikes, _ = sam_stim0.trace_data("Spikes-1")
     

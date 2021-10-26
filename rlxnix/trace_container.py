@@ -64,6 +64,17 @@ class TraceContainer(object):
         return self._tag.name
 
     @property
+    def id(self):
+        """Returns the id of the underlying nix tag.
+
+        Returns
+        -------
+        str
+            The id, a unique identifier of the tag.
+        """
+        return self._tag.id
+
+    @property
     def type(self) -> str:
         """The type of the data segment
 

@@ -34,6 +34,20 @@ class Stimulus(TraceContainer):
         logging.info(self.__str__())
 
     @property
+    def repro_tag_id(self):
+        """Returns the id of the ReproRun tag, to which this stimulus output belongs.
+
+        Returns
+        -------
+        str
+            the Repro Tag id.
+        """
+        feat_name = "_".join((self.name, "repro_tag_id"))
+        if feat_name in self._tag.features:
+            repro_id = self.feature_data(feat_name).ravel()[0]
+        return repro_id
+
+    @property
     def metadata(self):
         """Returns the metadata for this stimulus. The settings herein complete and supersede the ones of the RePro. For a complete view use the ReProRun.stimulus_metadata property.
 

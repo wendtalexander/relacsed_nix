@@ -5,8 +5,8 @@ class DataTrace(object):
     
     def __init__(self, data_array, mapping_version=1.1) -> None:
         super().__init__()
-        event_type = type_map[mapping_version][DataType.event]
-        continuous_type = type_map[mapping_version][DataType.continuous]
+        event_type = type_map[mapping_version][DataType.Event]
+        continuous_type = type_map[mapping_version][DataType.Continuous]
         t = data_array.type
         if (event_type not in t) and (continuous_type not in t):
             raise ValueError(f"DataTrace not valid to dataArrray of type {data_array.type}!")
@@ -14,9 +14,9 @@ class DataTrace(object):
         self._name = data_array.name
         self._id = data_array.id
         self._type = data_array.type
-        self._trace_type = DataType.continuous if continuous_type in data_array.type else DataType.event
+        self._trace_type = DataType.Continuous if continuous_type in data_array.type else DataType.Event
         self._shape = data_array.shape
-        if self._trace_type == DataType.event:
+        if self._trace_type == DataType.Event:
             self._max_time = data_array[-1]
         else:
             self._max_time = self._shape[0] * data_array.dimensions[0].sampling_interval

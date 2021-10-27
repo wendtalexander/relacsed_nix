@@ -38,7 +38,7 @@ class Baseline(ReProRun):
                 warnings.warn("Could not load {name} event data!", UserWarning)
 
     def _scan_tag(self):
-        sampled_data = [da for da in self.repro_tag.references if type_map[self._mapping_version][DataType.continuous] in da.type]
+        sampled_data = [da for da in self.repro_tag.references if type_map[self._mapping_version][DataType.Continuous] in da.type]
         self._sampling_interval = -1 if len(sampled_data) == 0 else sampled_data[0].dimensions[0].sampling_interval
         """
         if self.spikes_trace in self.repro_tag.references:

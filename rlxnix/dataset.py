@@ -103,8 +103,8 @@ class Dataset(object):
                                                      self._relacs_nix_version)
 
     def _scan_traces(self):
-        event_type = type_map[self._relacs_nix_version][DataType.event]
-        continuous_type = type_map[self._relacs_nix_version][DataType.continuous]
+        event_type = type_map[self._relacs_nix_version][DataType.Event]
+        continuous_type = type_map[self._relacs_nix_version][DataType.Continuous]
 
         for da in self._block.data_arrays:
             if event_type in da.type:

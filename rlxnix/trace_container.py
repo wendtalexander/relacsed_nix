@@ -188,7 +188,7 @@ class TraceContainer(object):
         
         segment_stop_time = self.start_time + self.duration + after
         
-        if ref.trace_type == DataType.continuous:
+        if ref.trace_type == DataType.Continuous:
             if segment_stop_time > ref.maximum_time:
                 after = ref.maximum_time - self.stop_time
                 logging.warning(f"traceContainer._trace_data: segment stop time ({np.round(segment_stop_time, 5)}) is too large, beyond maximum time in trace {ref.name} ({ref.maximum_time})! reduced after to {np.round(after, 5)}!")
@@ -199,7 +199,7 @@ class TraceContainer(object):
         data = ref.data_array.get_slice([self.start_time - before], [self.duration + after + before], nixio.DataSliceMode.Data)[:]
         time = None
 
-        if ref.trace_type == DataType.continuous:  
+        if ref.trace_type == DataType.Continuous:  
             time = np.array(ref.data_array.dimensions[0].axis(len(data)))
             if reference == TimeReference.Absolute:
                 time += (self.start_time - before)

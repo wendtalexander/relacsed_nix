@@ -1,3 +1,5 @@
+import logging
+
 from .mappings import DataType, type_map
 
 
@@ -16,10 +18,12 @@ class DataTrace(object):
         self._type = data_array.type
         self._trace_type = DataType.Continuous if continuous_type in data_array.type else DataType.Event
         self._shape = data_array.shape
+        self._sampling_interval = None
         if self._trace_type == DataType.Event:
             self._max_time = data_array[-1]
         else:
             self._max_time = self._shape[0] * data_array.dimensions[0].sampling_interval
+            self._sampling_interval = data_array.dimensions[0].sampling_interval
 
     @property
     def trace_type(self):
@@ -40,6 +44,12 @@ class DataTrace(object):
     @property
     def data_array(self):
         return self._data_array
+
+    @property
+    def sampling_interval(self):
+        if self.trace_type == DataType.Event:
+            logging.warning("DataTrace: sampling interval makes no sense for event traces!")
+        return self._sampling_interval
 
     def __str__(self) -> str:
         str = f"Name: {self._name}\tid: {self._id}\ntype: {self._type}\t data type: {self._trace_type}\t shape {self._shape}\n maximum time: {self._max_time}"

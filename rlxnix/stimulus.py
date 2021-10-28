@@ -31,7 +31,7 @@ class Stimulus(TraceContainer):
         self._absolute_starttime = None
         self._delay = None
         self._next_stimulus_start = next_stimulus_start
-        logging.info(self.__str__())
+        logging.debug(self.__str__())
 
     @property
     def repro_tag_id(self):

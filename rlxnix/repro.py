@@ -3,6 +3,7 @@ import nixio
 from .trace_container import TraceContainer, TimeReference
 from .stimulus import Stimulus
 from .util import nix_metadata_to_dict
+from .data_trace import DataType
 
 
 class ReProRun(TraceContainer):
@@ -77,7 +78,18 @@ class ReProRun(TraceContainer):
             The respective time vector for continuous traces, None for event traces
         """
         return self._trace_data(name, reference=reference)
-    
+
+    def _check_stimulus(self, stimulus_index):
+        if stimulus_index >= len(self.stimuli) or stimulus_index < 0:
+            raise IndexError(f"Stimulus index {stimulus_index} is out of bounds for number of stimuli {len(self.stimuli)}")
+
+    def _check_trace(self, trace_name, data_type=DataType.Continuous):
+        if trace_name not in self._tag.references:
+            raise ValueError(f"Trace {trace_name} not found!")
+        trace = self._trace_map[trace_name]
+        if trace.trace_type != data_type:
+            raise ValueError(f"Data type of trace {trace.name} does not match expected data type (expected: {data_type}, found: {trace.trace_type}).")
+
     def __str__(self) -> str:
         info = "Repro: {n:s} \t type: {t:s}\n\tstart time: {st:.2f}s\tduration: {et:.2f}s"
         return info.format(n=self.name, t=self.type, st=self.start_time, et=self.duration)

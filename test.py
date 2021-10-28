@@ -6,14 +6,14 @@ import numpy as np
 import logging
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.WARNING)
+    logging.basicConfig(level=logging.INFO)
   
     if "macos" in platform.platform().lower():
         # d = rlx.Dataset("/Volumes/pocketbrain/data/2021-09-03-aa-invivo-2/2021-09-03-aa-invivo-2.nix")
         d = rlx.Dataset("data/2021-07-08-ad-invivo-1.nix")
     else:
-        d = rlx.Dataset("/media/grewe/pocketbrain/data/2021-09-03-bv-invivo-2/2021-09-03-bv-invivo-2.nix")
-
+        #d = rlx.Dataset("/media/grewe/pocketbrain/data/2021-09-03-bv-invivo-2/2021-09-03-bv-invivo-2.nix")
+        d = rlx.Dataset("/data/invivo/2021-08-03-ab-invivo-1/2021-08-03-ab-invivo-1.nix")
     sam_runs = d.repro_runs("sam", False)
     if len(sam_runs) > 0: 
         sam = sam_runs[0]
@@ -39,5 +39,9 @@ if __name__ == "__main__":
     if len(chirps) > 0:
         chirp = chirps[0]
         chirp.plot_overview()
-    
+
+    filestims = d.repro_runs("filestim", exact=False)
+    f = filestims[0]
+    v1, vt = f.membrane_voltage(0)
+    stim, time = f.load_stimulus() 
     embed()

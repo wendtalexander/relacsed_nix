@@ -138,8 +138,15 @@ class TraceContainer(object):
         -------
             List: index, name and type of the references
         """
-        
         return list(self._trace_map.keys())
+
+    def trace_info(self, trace_name):
+        ti = None
+        if trace_name in self._trace_map.keys():
+            ti = self._trace_map[trace_name]
+        else:
+            logging.error(f"TraceContainer: Key error, {trace_name} is not known trace name!")
+        return ti
 
     @property
     def features(self) -> list:

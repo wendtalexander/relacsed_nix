@@ -1,10 +1,10 @@
 import nixio
 import os
 import inspect
-from importlib import import_module
-import datetime as dt
 import logging
+import datetime as dt
 from tqdm import tqdm
+from importlib import import_module
 
 from .stimulus import Stimulus
 from .mappings import DataType, type_map
@@ -59,6 +59,7 @@ class Dataset(object):
         if not os.path.exists(filename):
             logging.error("rlxnix cannot read file %s, does not exist!" % filename)
             raise ValueError("RelacsNIX cannot read file %s, does not exist!" % filename)
+        logging.info(f"Dataset: opening nix file {filename}")
         self._filename = filename
         self._nixfile = nixio.File.open(filename, nixio.FileMode.ReadOnly)
         self._block = self._nixfile.blocks[0]
@@ -131,8 +132,10 @@ class Dataset(object):
     def repros(self) -> list:
         """Returns the RePros that have been run in this dataset
 
-        Returns:
-            list: RePro names.
+        Returns
+        -------
+        list
+            The RePro names.
         """
         return list(self._repro_map.keys())
 
@@ -140,8 +143,10 @@ class Dataset(object):
     def event_traces(self) -> list:
         """Returns the names of the recorded event traces such as the detected spikes or other events.
 
-        Returns:
-            list: the trace rlxnix.DataTrace instances.
+        Returns
+        -------
+        list
+            the trace rlxnix.DataTrace instances.
         """
         return self._event_traces
 
@@ -149,37 +154,44 @@ class Dataset(object):
     def data_traces(self) -> list:
         """Returns the names of the recorded data traces such as the membrane potential.
 
-        Returns:
+        Returns
+        -------
             list: the rlxnix.DataTrace instances.
         """
         return self._data_traces
 
-    def repro_runs(self, repro_name, exact=True) -> list:
+    def repro_runs(self, repro_name=None, exact=True) -> list:
         """Returns the RePro class instances providing access to data and metadata of the repro runs.
 
-        Args:
-            repro_name (str): The name of the desired RePro run.
-            exact (bool, optional): If True, the name must be an exact match to the actually run RePro runs. If False, all possible matches are returned.Defaults to True.
+        Paramters
+        ---------
+            repro_name : str, optional
+                The name of the desired RePro run. If not given, all repro runs are returned. Defaults to None.
+            exact : bool, optional
+                If True, the name must be an exact match to the actually run RePro runs. If False, all possible matches are returned. Defaults to True.
 
-        Raises:
-            KeyError: When no match for the provided repro_name was found, a KeyError is raised.
-
-        Returns:
-            list: List of RePro class instances.
+        Returns
+        -------
+        list 
+            List of RePro class instances that match the repro_name. If repro_name is not given, all repro runs are returned. May be empty.
         """
         def not_found_error(name, exact):
-            raise KeyError(f"No repro run with the name {name} found with exact={exact}")
+            logging.warning(f"No repro run with the name {name} found with exact={exact}")
 
-        if exact:
-            if repro_name in self._repro_map.keys():
-                return [self._repro_map[repro_name]]
-            else:
-                not_found_error(repro_name, exact)
+        matches = []
+        if not repro_name:
+            matches = [self._repro_map[k] for k in self._repro_map.keys()]
         else:
-            data = [self._repro_map[k] for k in self._repro_map.keys() if repro_name.lower() in k.lower()]
-            if len(data) < 1:
-                not_found_error(repro_name, exact)
-            return data
+            if exact:
+                if repro_name in self._repro_map.keys():
+                    matches = [self._repro_map[repro_name]]
+                else:
+                    not_found_error(repro_name, exact)
+            else:
+                matches = [self._repro_map[k] for k in self._repro_map.keys() if repro_name.lower() in k.lower()]
+                if len(matches) < 1:
+                    not_found_error(repro_name, exact)
+        return matches
 
     def close(self):
         """Close the nix file, if open. Note: Once the file is closed accessing the data via one of the repro run classes will not work!
@@ -192,8 +204,10 @@ class Dataset(object):
     def is_open(self) -> bool:
         """Returns whether the nix file is still open.
 
-        Returns:
-            bool: True if the file is open, False otherwise.
+        Returns
+        -------
+        bool
+            True if the file is open, False otherwise.
         """
         return self._nixfile and self._nixfile.is_open()
 
@@ -201,17 +215,21 @@ class Dataset(object):
     def name(self) -> str:
         """Returns the name of the dataset (i.e. the full filename)
         
-        Returns:
-            str: The full filename
+        Returns
+        -------
+        str
+            The full filename
         """
         return self._filename
 
     @property
     def nix_file(self) -> nixio.File:
         """Returns the nix-file.
-        
-        Returns:
-           The nix file, if open, None otherwise.
+
+        Returns
+        -------
+        nixio.File
+            The nix file, if open, None otherwise.
         """
         return self._nixfile if self.is_open else None
 
@@ -219,8 +237,9 @@ class Dataset(object):
     def recording_date(self) -> str:
         """The recording data of the dataset
 
-        Returns:
-        str:
+        Returns
+        -------
+        str
             iso-format string of the file creation timestamp
         """
         date = None

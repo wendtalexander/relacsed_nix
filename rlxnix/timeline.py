@@ -1,9 +1,14 @@
 import numpy as np
 from enum import Enum
-
+import matplotlib.pyplot as plt
 from IPython import embed
 
 class IntervalMode(Enum):
+    """The IntervalMode defines how Timeline will search for respros.
+
+    IntervalMode.Within: to find ReproRuns that start and end within the given interval
+    IntervalMode.Embracing: to find ReproRuns that embrace the given time interval. That is, the time interval must be within the ReproRun start and end.
+    """
     Within = 1
     Embracing = 2
 
@@ -12,8 +17,9 @@ class Timeline(object):
     """
     Class that represents the timeline of the dataset. It contains the start and end times of all repro Runs and all stimulus outputs stored in the recording.
     """
-    def __init__(self, repro_map, stimulus_mtags) -> None:
+    def __init__(self, filename, repro_map, stimulus_mtags) -> None:
         super().__init__()
+        self._filename = filename
         self._repro_start_times = np.zeros(len(repro_map))
         self._repro_stop_times = np.zeros_like(self._repro_start_times)
         self._repro_names = np.empty_like(self._repro_start_times, dtype=object)
@@ -154,3 +160,78 @@ class Timeline(object):
     @property
     def max_time(self):
         return self._repro_stop_times[-1]
+
+    def __repr__(self) -> str:
+        return "rlxnix.Timeline"
+    
+    def plot(self):
+        """plots the timeline for some visual inspections.
+        """
+        def _update_repro_annotation(ind):
+            bar_index = ind["ind"][0]
+            pos = (repro_bar_centers[bar_index], 0.9)
+            repro_annotation.xy = pos
+            text = "{name:s}\n{start:.4f}s to {end:.4f}s".format(name=self._repro_names[bar_index],
+                                                                  start=self._repro_start_times[bar_index],
+                                                                  end=self._repro_stop_times[bar_index])
+            repro_annotation.set_text(text)
+            repro_annotation.get_bbox_patch().set_facecolor(None)
+            repro_annotation.get_bbox_patch().set_alpha(0.4)
+        
+        def _hover(event):
+            if event.button == 1:
+                return
+            vis = repro_annotation.get_visible()
+            if event.inaxes == axis:
+                cont, ind = bar_collection.contains(event)
+                if cont:
+                    _update_repro_annotation(ind)
+                    repro_annotation.set_visible(True)
+                    fig.canvas.draw_idle()
+                else:
+                    if vis:
+                        repro_annotation.set_visible(False)
+                        fig.canvas.draw_idle()
+
+        fig, axis = plt.subplots(ncols=1, nrows=1, figsize=(15, 2.5), constrained_layout=True)
+        axis.set_title(self._filename)
+        fig.canvas.mpl_connect("motion_notify_event", _hover)
+        repro_extents = []
+        repro_colors = []
+        repro_bar_centers = []
+        repro_color_map = {}
+        color_map = plt.get_cmap("tab10").colors
+        unique_repro_names = list(np.unique([name.split("_")[0] for name in self._repro_names]))
+        for start, stop, name in zip(self._repro_start_times, self._repro_stop_times, self._repro_names):
+            repro_extents.append(stop - start)
+            repro_bar_centers.append(start + repro_extents[-1]/2)
+            index = unique_repro_names.index(name.split("_")[0])
+            repro_colors.append(color_map[index])
+            repro_color_map[name] = repro_colors[-1]
+
+        bar_collection = axis.broken_barh(xranges=list(zip(self._repro_start_times, repro_extents)),
+                                          yrange=(0.5, 0.5), facecolors=repro_colors, linewidth=0.1,
+                                          edgecolor="black", alpha=0.75)
+
+        repro_annotation = axis.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
+                                         bbox=dict(boxstyle="round", fc="w"), arrowprops=dict(arrowstyle="->"))
+        repro_annotation.set_visible(False)
+
+        stimulus_colors = []
+        stimulus_extents = []
+        for start, stop, name in zip(self._stim_start_times, self._stim_stop_times, self._stim_names):
+            stimulus_extents.append(stop - start)
+            r = self.find_repro_runs(start, stop, IntervalMode.Embracing)
+            stimulus_colors.append(repro_color_map[r[0]])
+        stim_bar_collection = axis.broken_barh(xranges=list(zip(self._stim_start_times, stimulus_extents)),
+                                               yrange=(0.65, 0.2), facecolors=stimulus_colors, linewidth=0.1,
+                                               edgecolor="black", alpha=1)
+
+        axis.spines["top"].set_visible(False)
+        axis.spines["left"].set_visible(False)
+        axis.spines["right"].set_visible(False)
+        axis.set_yticks([])
+        axis.set_ylim(0, 1.5)
+        axis.set_xlabel("time [s]")
+
+        plt.show()

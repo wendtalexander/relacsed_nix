@@ -123,7 +123,7 @@ class Dataset(object):
         logging.info("Searching repro runs...")
         self._scan_repros()
         logging.info(f"Creating timeline ...")
-        self._timeline = Timeline(self._repro_map, self._block.multi_tags)
+        self._timeline = Timeline(self.name, self._repro_map, self._block.multi_tags)
         logging.info("Sorting stimuli...")
         self._scan_stimuli()
         logging.info("...done")
@@ -258,6 +258,10 @@ class Dataset(object):
         """
         mdata = nix_metadata_to_dict(self._block.metadata)
         return mdata
+
+    @property
+    def plot_timeline(self):
+        self._timeline.plot()
 
     def __str__(self) -> str:
         info = "{n:s}\n\tlocation: {l:s}\n\trecording data: {rd:s}\n\tfile size {s:.2f} MB"

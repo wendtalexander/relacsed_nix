@@ -32,7 +32,7 @@ if __name__ == "__main__":
         spike_times, _ = baseline_data[0].trace_data("Spikes-1")
         plt.plot(bt, bd)
         plt.scatter(spike_times, np.ones_like(spike_times) * np.max(bd))
-    plt.show()
+    plt.close()
 
 
     chirps = d.repro_runs("Eigen", exact=False)
@@ -41,7 +41,9 @@ if __name__ == "__main__":
         chirp.plot_overview()
 
     filestims = d.repro_runs("filestim", exact=False)
-    f = filestims[0]
-    v1, vt = f.membrane_voltage(0)
-    stim, time = f.load_stimulus() 
+    if len(filestims) > 0:
+        f = filestims[0]
+        v1, vt = f.membrane_voltage(0)
+        stim, time = f.load_stimulus() 
+    d._timeline.plot()
     embed()

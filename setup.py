@@ -1,5 +1,4 @@
 from setuptools import setup
-from tqdm.std import tqdm
 
 NAME = "rlxnix"
 VERSION = 0.5

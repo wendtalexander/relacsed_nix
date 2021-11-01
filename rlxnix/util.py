@@ -50,3 +50,32 @@ def data_links_to_pandas(data_links):
     return pd.concat(df_list, ignore_index=True)
 
 
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+class MetadataBuffer(metaclass=Singleton):
+    def __init__(self) -> None:
+        super().__init__()
+        self._buffer = {}
+
+    def put(self, tag_id, metadata):
+        if id not in self._buffer.keys():
+            self._buffer[id] = metadata
+
+    def has(self, id):
+        return id in self._buffer.keys()
+
+    def get(self, id):
+        if self.has(id):
+            return self._buffer[id].copy()
+        else:
+            return None
+
+    def clear(self):
+        self._buffer.clear()

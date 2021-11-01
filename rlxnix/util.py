@@ -1,4 +1,6 @@
 import os
+import numpy as np
+import json
 
 
 def nix_metadata_to_dict(section):
@@ -8,6 +10,15 @@ def nix_metadata_to_dict(section):
     for s in section.sections:
         info[s.name] = nix_metadata_to_dict(s)
     return info
+
+
+def np_encoder(object):
+    if isinstance(object, np.generic):
+        return object.item()
+
+
+def metadata_to_json(dict):
+    return json.dumps(dict, default=np_encoder)
 
 
 def is_windows_path(path):

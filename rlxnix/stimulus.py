@@ -3,7 +3,7 @@ import logging
 import numpy as np
 
 from .trace_container import TraceContainer, TimeReference
-from .util import nix_metadata_to_dict, metadata_to_json
+from .util import nix_metadata_to_dict, metadata_to_json, MetadataBuffer
 from .data_loader import DataLink, SegmentType
 
 
@@ -29,6 +29,7 @@ class Stimulus(TraceContainer):
         """
         super().__init__(stimulus_multi_tag, index, traces, relacs_nix_version=relacs_nix_version)
         self._multi_tag = stimulus_multi_tag
+        self._metadata_buffer = MetadataBuffer()
         self._metadata = None
         self._absolute_starttime = None
         self._delay = None
@@ -59,7 +60,12 @@ class Stimulus(TraceContainer):
                 The metadata dictionary
         """
         if self._metadata is None:
-            metadata = nix_metadata_to_dict(self._tag.metadata)
+            if self._metadata_buffer.has(self.id):
+                metadata = self._metadata_buffer.get(self.id)
+            else:
+                metadata = nix_metadata_to_dict(self._tag.metadata)
+                self._metadata_buffer.put(self.id, metadata.copy())
+
             for index, name, type in self.features:
                 if "mutable" in type:
                     suffix = name.split(self.name + "_")[-1]
@@ -180,9 +186,9 @@ class Stimulus(TraceContainer):
         rlxnix.DataLink
             The DataLink object.
         """
-        dataset = self.repro_tag._parent.name + ".nix"
-        block_id = self.repro_tag._parent.id
-        tag_id = self.repro_tag.id
+        dataset = self._tag._parent.name + ".nix"
+        block_id = self._tag._parent.id
+        tag_id = self.id
         type = SegmentType.StimulusSegment
         mdata = metadata_to_json(self.metadata)
         before = self.delay

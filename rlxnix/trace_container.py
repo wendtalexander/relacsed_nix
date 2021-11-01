@@ -180,7 +180,7 @@ class TraceContainer(object):
         Returns
         -------
         data: np.ndarray
-            The recorded continuos or event data 
+            The recorded continuos or event data
         time: np.ndarray
             The respective time vector for continuous traces, None for event traces
         """
@@ -192,9 +192,9 @@ class TraceContainer(object):
         if name not in self._tag.references or name not in self._trace_map.keys():
             raise ValueError(f"Could not find {name} in the list of references.")
         ref = self._trace_map[name]
-        
+
         segment_stop_time = self.start_time + self.duration + after
-        
+
         if ref.trace_type == DataType.Continuous:
             if segment_stop_time > ref.maximum_time:
                 after = ref.maximum_time - self.stop_time
@@ -202,7 +202,7 @@ class TraceContainer(object):
                 segment_stop_time = self.start_time + self.duration + after
 
         logging.debug(f"TraceContainer._trace_data: get data slice from {np.round(self.start_time - before, 5)} to {np.round(segment_stop_time, 5)}")
-        
+
         data = ref.data_array.get_slice([self.start_time - before], [self.duration + after + before], nixio.DataSliceMode.Data)[:]
         time = None
 

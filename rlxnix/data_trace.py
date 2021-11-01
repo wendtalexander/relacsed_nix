@@ -40,7 +40,7 @@ class DataTrace(object):
 
     @property
     def maximum_time(self):
-        """The maxiumum time represetend in this Trace
+        """The maximum time represetend in this Trace
 
         Returns
         -------

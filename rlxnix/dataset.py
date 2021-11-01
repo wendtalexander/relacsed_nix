@@ -271,7 +271,8 @@ class Dataset(object):
                               "s": os.path.getsize(self._filename)/1e+6})
 
     def __repr__(self) -> str:
-        return super().__repr__()
+        repr = "Dataset object for file {name:s} at {id}"
+        return repr.format(name=self.name, id=hex(id(self)))
 
     def __del__(self):
         """make sure, the nix-file is closed.

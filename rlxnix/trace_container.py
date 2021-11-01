@@ -40,6 +40,9 @@ class TraceContainer(object):
             raise ValueError("Index must not be None, if a multiTag is passed!")
 
         self._tag = tag_or_mtag
+        self._tag_id = tag_or_mtag.id
+        self._tag_name = tag_or_mtag.name
+        self._tag_type = tag_or_mtag.type
         self._mapping_version = relacs_nix_version
         self._index = index
         self._features = None
@@ -61,7 +64,7 @@ class TraceContainer(object):
         string
             the name
         """
-        return self._tag.name
+        return self._tag_name
 
     @property
     def id(self):
@@ -72,7 +75,7 @@ class TraceContainer(object):
         str
             The id, a unique identifier of the tag.
         """
-        return self._tag.id
+        return self._tag_id
 
     @property
     def type(self) -> str:
@@ -83,7 +86,7 @@ class TraceContainer(object):
         string 
             the type
         """
-        return self._tag.type
+        return self._tag_type
 
     @property
     def start_time(self) -> float:

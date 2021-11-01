@@ -1,7 +1,10 @@
 import os
-import numpy as np
 import json
+import logging
+import numpy as np
+import pandas as pd
 
+from tqdm import tqdm
 
 def nix_metadata_to_dict(section):
     info = {}
@@ -38,3 +41,12 @@ def convert_path(path):
         else:
             converted = path
     return converted
+
+
+def data_links_to_pandas(data_links):
+    df_list = []
+    for dl in tqdm(data_links, disable=not(logging.root.level == logging.INFO)):
+        df_list.append(dl.to_pandas())
+    return pd.concat(df_list, ignore_index=True)
+
+

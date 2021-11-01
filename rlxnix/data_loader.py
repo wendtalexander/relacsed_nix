@@ -2,7 +2,8 @@ import os
 import nixio
 import logging
 import numpy as np
-from enum import Enum, auto
+import pandas as pd
+from enum import Enum
 
 from .util import convert_path
 from .mappings import DataType, type_map
@@ -76,7 +77,7 @@ class DataLink(object):
 
     @property
     def segment_type(self):
-        return self._segment_type
+        return str(self._segment_type)
 
     @property
     def start_time(self):
@@ -106,10 +107,22 @@ class DataLink(object):
     def metadata(self):
         return self._metadata
 
+    @staticmethod
+    def columns()->list:
+        cols = ["dataset", "block_id", "tag_id", "segment_type", "start_time", "stop_time", "index", "max_before", "max_after", "mapping_version", "metadata"]
+        return cols
+
+    def to_pandas(self):
+        cols = self.columns()
+        values = [getattr(self, c) for c in cols]
+        
+        return pd.DataFrame([values], columns=cols)
+
     def __repr__(self) -> str:
         repr = "DataLink for {type}, {id} of dataset {name} from {start:.4f}s to {stop:.4f}s at {self_id}"
         return repr.format(type=str(self.segment_type), id=self.tag_id, name=self.dataset,
                            start=self.start_time, stop=self.stop_time, self_id=hex(id(self)))
+
 
 def load_data_segment(data_link : DataLink, trace_name : str, before=0.0, after=0.0,
                       data_location="."):

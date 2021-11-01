@@ -1,9 +1,12 @@
 import nixio
+import logging
+from tqdm import tqdm
 
 from .trace_container import TraceContainer, TimeReference
 from .stimulus import Stimulus
-from .util import nix_metadata_to_dict
+from .util import nix_metadata_to_dict, metadata_to_json
 from .data_trace import DataType
+from .data_loader import DataLink, SegmentType
 
 
 class ReProRun(TraceContainer):
@@ -79,6 +82,38 @@ class ReProRun(TraceContainer):
         """
         return self._trace_data(name, reference=reference)
 
+    def stimulus_data_links(self):
+        """Collection of rlxnix.DataLink objects for each stimulus presented in this ReproRun.
+
+        Returns
+        -------
+        list of rlxnix.DataLink
+            List of DataLink objects
+        """
+        data_links = []
+        for s in tqdm(self.stimuli, disable=not(logging.root.level == logging.INFO)):
+            data_links.append(s.data_link())
+        return data_links
+
+    def data_link(self):
+        """ Returns a DataLink object to the data recorded in this ReproRun
+
+        Returns
+        -------
+        rlxnix.DataLink
+            The DataLink object
+        """
+        dataset = self.repro_tag._parent.name + ".nix"
+        block_id = self.repro_tag._parent.id
+        tag_id = self.repro_tag.id
+        type = SegmentType.ReproRun
+        mdata = metadata_to_json(self.metadata)
+
+        dl = DataLink(dataset, block_id, tag_id, type, self.start_time,
+                      self.stop_time, metadata=mdata,
+                      relacs_nix_mapping_version=self._mapping_version)
+        return dl
+
     def _check_stimulus(self, stimulus_index):
         if stimulus_index >= len(self.stimuli) or stimulus_index < 0:
             raise IndexError(f"Stimulus index {stimulus_index} is out of bounds for number of stimuli {len(self.stimuli)}")
@@ -95,4 +130,5 @@ class ReProRun(TraceContainer):
         return info.format(n=self.name, t=self.type, st=self.start_time, et=self.duration)
 
     def __repr__(self) -> str:
-        return super().__repr__()
+        repr = "ReproRun object for repro run {name} from {start:.4f} to {stop:.4f}s, Tag {id} at {pos}." 
+        return repr.format(name=self.name, start=self.start_time, stop=self.stop_time, id=self.repro_tag.id, pos=hex(id(self)))

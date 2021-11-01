@@ -45,5 +45,5 @@ if __name__ == "__main__":
         f = filestims[0]
         v1, vt = f.membrane_voltage(0)
         stim, time = f.load_stimulus() 
-    d._timeline.plot()
+    d.plot_timeline
     embed()

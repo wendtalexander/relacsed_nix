@@ -170,6 +170,12 @@ class Timeline(object):
         def _update_repro_annotation(ind):
             bar_index = ind["ind"][0]
             pos = (repro_bar_centers[bar_index], 0.9)
+            if pos[0] > axis.get_xlim()[-1]/2:
+                repro_annotation.set_x(-20)
+                repro_annotation.set_ha("right")
+            else:
+                repro_annotation.set_x(20)
+                repro_annotation.set_ha("left")
             repro_annotation.xy = pos
             text = "{name:s}\n{start:.4f}s to {end:.4f}s".format(name=self._repro_names[bar_index],
                                                                   start=self._repro_start_times[bar_index],
@@ -213,8 +219,8 @@ class Timeline(object):
                                           yrange=(0.5, 0.5), facecolors=repro_colors, linewidth=0.1,
                                           edgecolor="black", alpha=0.75)
 
-        repro_annotation = axis.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
-                                         bbox=dict(boxstyle="round", fc="w"), arrowprops=dict(arrowstyle="->"))
+        repro_annotation = axis.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points", 
+                                         ha="center", bbox=dict(boxstyle="round", fc="w"), arrowprops=dict(arrowstyle="->"))
         repro_annotation.set_visible(False)
 
         stimulus_colors = []

@@ -39,14 +39,33 @@ class MetadataBuffer(metaclass=Singleton):
         self._buffer.clear()
 
 
-    def has(self, id):
-        return id in self._buffer.keys()
+class FeatureBuffer(metaclass=Singleton):
+    def __init__(self) -> None:
+        super().__init__()
+        self._buffer = {}
 
-    def get(self, id):
-        if self.has(id):
-            return self._buffer[id].copy()
+    def put(self, tag_id, feature_name, feature_data):
+        logging.info(f"FeatureBuffer: add feature data feature {feature_name} for tag {tag_id}!")
+        if tag_id not in self._buffer.keys():
+            self._buffer[tag_id] = {feature_name: feature_data}
         else:
+            if feature_name not in self._buffer[tag_id].keys():
+                self._buffer[tag_id][feature_name] = feature_data
+
+    def has(self, tag_id, feature_name):
+        found = tag_id in self._buffer.keys()
+        found = found and feature_name in self._buffer[tag_id].keys()
+        logging.info(f"FeatureBuffer: feature data for feature {feature_name} and tag {tag_id} in buffer: {found}!")
+        return found
+
+    def get(self, tag_id, feature_name):
+        if self.has(tag_id, feature_name) :
+            logging.info(f"FeatureBuffer: found feature data for feature {feature_name} and tag {tag_id}!")
+            return self._buffer[tag_id][feature_name].copy()
+        else:
+            logging.info(f"FeatureBuffer: did not find Feature {feature_name} for tag {tag_id}!")
             return None
 
     def clear(self):
+        logging.debug("FeatureBuffer cleared!")
         self._buffer.clear()

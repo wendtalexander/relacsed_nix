@@ -60,6 +60,35 @@ class Stimulus(TraceContainer):
             metadata: dict
                 The metadata dictionary
         """
+        def find_subdict(mdata, key):
+            if key in mdata.keys():
+                return mdata[key]
+            for k in mdata.keys():
+                subdict = mdata[k]
+                if isinstance(subdict, dict):
+                    if key in subdict:
+                        return subdict[key]
+                    found = find_subdict(subdict, key)
+                    if found is not None:
+                        return found
+                else:
+                    continue
+            return None
+
+        def update_metadata(mdata, key, value, unit):
+            if "." not in key:
+                mdata[key] = (value, unit)
+            else:
+                parts = key.split(".")
+                if parts[0] in mdata.keys():
+                    update_metadata(mdata[parts[0]], ".".join(parts[1:]), value, unit)
+                else:
+                    mdata = find_subdict(mdata, parts[0])
+                    if mdata is not None:
+                        update_metadata(mdata, ".".join(parts[1:]), value, unit)
+                    else:
+                        logging.error(f"Could not find subdict for key {parts[0]}! Skipping")
+
         if self._metadata is None:
             if self._metadata_buffer.has(self.id):
                 metadata = self._metadata_buffer.get(self.id)
@@ -71,12 +100,12 @@ class Stimulus(TraceContainer):
                 if "mutable" in type:
                     suffix = name.split(self.name + "_")[-1]
                     try:
-                        feature_data = self.feature_data(index)
+                        feature_data = self.feature_data(name)
                     except:
+                        logging.error(f"Could not read feature data for {name}! Skipped!")
                         continue
                     feature_unit = self._tag.features[index].data.unit
-                    if suffix in metadata[self.name]:
-                        metadata[self.name][suffix] = (feature_data.ravel().tolist(), feature_unit)
+                    update_metadata(metadata[self.name], suffix, feature_data.ravel().tolist(), feature_unit)
             self._metadata = metadata
         return self._metadata
 

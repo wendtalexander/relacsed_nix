@@ -1,10 +1,10 @@
-from inspect import trace
 import nixio
 import numpy as np
 from enum import Enum
 import logging
 
 from .mappings import DataType, type_map
+from .buffers import FeatureBuffer
 
 
 class TimeReference(Enum):
@@ -45,6 +45,7 @@ class TraceContainer(object):
         self._tag_type = tag_or_mtag.type
         self._mapping_version = relacs_nix_version
         self._index = index
+        self._feature_buffer = FeatureBuffer()
         self._features = None
         self._trace_map = traces
 
@@ -219,13 +220,13 @@ class TraceContainer(object):
             data -=  0.0 if reference is TimeReference.Absolute else self.start_time
         return data, time
 
-    def feature_data(self, name_or_index):
+    def feature_data(self, name):
         """Get the feature data that is related to this ReproRun or stimulus
 
         Parameters
         ----------
-        name_or_index : str or int
-            The name or the index of the feature (consult the features property to see which features are stored)
+        name : str
+            The name of the feature (consult the features property to see which features are stored)
 
         Returns
         -------
@@ -237,12 +238,21 @@ class TraceContainer(object):
         ValueError
             If this container is a Stimulus and there is no position index stored, a ValueError is raised, should never happen.
         """
+        buffered_data = None
+        if self._feature_buffer.has(self.id, name):
+            buffered_data = self._feature_buffer.get(self.id, name)
+        else:
+            buffered_data = self.repro_tag.features[name].data[:]
+            self._feature_buffer.put(self.id, name, buffered_data)
+
         if isinstance(self._tag, nixio.MultiTag) and self._index is not None:
-            logging.debug(f"reading feature data from {name_or_index} with index {self._index}")
-            feat_data = self._tag.feature_data(self._index, name_or_index)
-        elif isinstance(self._tag, nixio.Tag):    
-            logging.debug(f"reading feature data from {name_or_index}")
-            feat_data = self._tag.feature_data(name_or_index)
+            logging.debug(f"reading feature data from {name} with index {self._index}")
+            feat_data = buffered_data[self._index]
+            # feat_data = self._tag.feature_data(self._index, name)
+        elif isinstance(self._tag, nixio.Tag):
+            logging.debug(f"reading feature data from {name}")
+            # feat_data = self._tag.feature_data(name)
+            feat_data = buffered_data
         else:
             raise ValueError(f"TraceContainer, feature_data: something went wrong, no Index? Tag: {self._tag}, Index:{self._index}")
         return feat_data[:]

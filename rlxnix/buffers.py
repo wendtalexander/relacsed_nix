@@ -17,26 +17,26 @@ class MetadataBuffer(metaclass=Singleton):
         self._buffer = {}
 
     def put(self, tag_id, metadata):
-        logging.info(f"Metadata Buffer: add metadata for tag {tag_id}!")
+        logging.debug(f"Metadata Buffer: add metadata for tag {tag_id}!")
         if id not in self._buffer.keys():
             self._buffer[tag_id] = metadata
 
     def has(self, tag_id):
         found = tag_id in self._buffer.keys()
-        logging.info(f"Metadata Buffer: metadata for tag {tag_id} in buffer: {found}!")
+        logging.debug(f"Metadata Buffer: metadata for tag {tag_id} in buffer: {found}!")
         return found
 
     def get(self, tag_id):
         if self.has(tag_id):
-            logging.info(f"Metadata Buffer: found metadata for tag {tag_id}!")
+            logging.debug(f"Metadata Buffer: found metadata for tag {tag_id}!")
             return self._buffer[tag_id].copy()
         else:
-            logging.info(f"MetadataBuffer: did not find metadata for tag {tag_id}!")
+            logging.debug(f"MetadataBuffer: did not find metadata for tag {tag_id}!")
             return None
 
     def clear(self):
-        logging.debug("MetadataBuffer cleared!")
         self._buffer.clear()
+        logging.debug(f"MetadataBuffer cleared! {len(self._buffer)}")
 
 
 class FeatureBuffer(metaclass=Singleton):
@@ -45,7 +45,7 @@ class FeatureBuffer(metaclass=Singleton):
         self._buffer = {}
 
     def put(self, tag_id, feature_name, feature_data):
-        logging.info(f"FeatureBuffer: add feature data feature {feature_name} for tag {tag_id}!")
+        logging.debug(f"FeatureBuffer: add feature data feature {feature_name} for tag {tag_id}!")
         if tag_id not in self._buffer.keys():
             self._buffer[tag_id] = {feature_name: feature_data}
         else:
@@ -55,15 +55,15 @@ class FeatureBuffer(metaclass=Singleton):
     def has(self, tag_id, feature_name):
         found = tag_id in self._buffer.keys()
         found = found and feature_name in self._buffer[tag_id].keys()
-        logging.info(f"FeatureBuffer: feature data for feature {feature_name} and tag {tag_id} in buffer: {found}!")
+        logging.debug(f"FeatureBuffer: feature data for feature {feature_name} and tag {tag_id} in buffer: {found}!")
         return found
 
     def get(self, tag_id, feature_name):
         if self.has(tag_id, feature_name) :
-            logging.info(f"FeatureBuffer: found feature data for feature {feature_name} and tag {tag_id}!")
+            logging.debug(f"FeatureBuffer: found feature data for feature {feature_name} and tag {tag_id}!")
             return self._buffer[tag_id][feature_name].copy()
         else:
-            logging.info(f"FeatureBuffer: did not find Feature {feature_name} for tag {tag_id}!")
+            logging.debug(f"FeatureBuffer: did not find Feature {feature_name} for tag {tag_id}!")
             return None
 
     def clear(self):

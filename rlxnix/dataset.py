@@ -264,7 +264,6 @@ class Dataset(object):
         mdata = nix_metadata_to_dict(self._block.metadata)
         return mdata
 
-    @property
     def plot_timeline(self):
         self._timeline.plot()
 

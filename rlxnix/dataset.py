@@ -12,6 +12,7 @@ from .repro import ReProRun
 from .timeline import Timeline
 from .util import nix_metadata_to_dict
 from .data_trace import DataTrace
+from .buffers import MetadataBuffer, FeatureBuffer
 
 from IPython import embed
 
@@ -74,6 +75,8 @@ class Dataset(object):
         self._data_traces = []
         self._trace_map = {}
         self._repro_map = {}
+        self._metadata_buffer = MetadataBuffer()
+        self._feature_buffer = FeatureBuffer()
         self._scan_file()
 
     def _scan_stimuli(self):
@@ -199,6 +202,8 @@ class Dataset(object):
         if self._nixfile.is_open():
             self._nixfile.close()
         self._nixfile = None
+        self._metadata_buffer.clear()
+        self._feature_buffer.clear()
 
     @property
     def is_open(self) -> bool:

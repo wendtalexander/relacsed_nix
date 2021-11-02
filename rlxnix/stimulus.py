@@ -3,7 +3,8 @@ import logging
 import numpy as np
 
 from .trace_container import TraceContainer, TimeReference
-from .util import nix_metadata_to_dict, metadata_to_json, MetadataBuffer
+from .util import nix_metadata_to_dict, metadata_to_json
+from .buffers import MetadataBuffer
 from .data_loader import DataLink, SegmentType
 
 

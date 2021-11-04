@@ -15,7 +15,7 @@ packages = [
     "rlxnix",
 ]
 
-install_req = ["nixio", "pandas", "matplotlib", "numpy", "tqdm", "json"]
+install_req = ["nixio>=1.5", "pandas", "matplotlib", "numpy", "tqdm"]
 
 setup(
     name=NAME,

@@ -201,9 +201,9 @@ def load_data_segment(data_link : DataLink, trace_name : str, before=0.0, after=
         stop_time += data_link.max_after
     else:
         stop_time += after
-
-    logging.debug(f"Reading data from data array {data_array} in the interval {start_time}, {stop_time}.")
-    data = data_array.get_slice([start_time], [stop_time], nixio.DataSliceMode.Data)[:]
+    extent = stop_time - start_time
+    logging.info(f"Reading data from data array {data_array} in the interval {start_time}, {stop_time}.")
+    data = data_array.get_slice([start_time], [extent], nixio.DataSliceMode.Data)[:]
     time = None
     if trace_type == continuous_type:
         time = np.array(data_array.dimensions[0].axis(len(data)))

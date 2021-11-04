@@ -201,7 +201,9 @@ class Stimulus(TraceContainer):
         if self.next_stimulus_start is None:
             logging.warning(f"stimulus.trace_data after {after} is too large! There is no next stimulus, after is set to zero!")
             after = 0.0
-        max_after = self.next_stimulus_start - self.stop_time
+            max_after = 0.0
+        else:
+            max_after = self.next_stimulus_start - self.stop_time
         if after > 0.0 and after > max_after:
             logging.warning(f"stimulus.trace_data after {np.round(after, 5)} is too large! after is set to next stimulus time - stimulus stop time {np.round(max_after, 5)}!")
             after = max_after
@@ -216,13 +218,16 @@ class Stimulus(TraceContainer):
         rlxnix.DataLink
             The DataLink object.
         """
+        if self.start_time >= self.stop_time:
+            logging.warning(f"Creating DataLink object for stimulus {self.name} fails because stimulus start time {self.start_time} is <= stimulus stop time {self.stop_time}!")
+            return None
         dataset = self._tag._parent.name + ".nix"
         block_id = self._tag._parent.id
         tag_id = self.id
         type = SegmentType.StimulusSegment
         mdata = metadata_to_json(self.metadata)
         before = self.delay
-        after = self.next_stimulus_start - self.stop_time
+        after = 0.0 if self.next_stimulus_start is None else self.next_stimulus_start - self.stop_time 
         dl = DataLink(dataset, block_id, tag_id, type, self.start_time,
                       self.stop_time, index=self._index, 
                       max_before=before, max_after=after, metadata=mdata,

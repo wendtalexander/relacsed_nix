@@ -82,7 +82,8 @@ class ReProRun(TraceContainer):
         """
         return self._trace_data(name, reference=reference)
 
-    def stimulus_data_links(self):
+    @property
+    def stimulus_data_links(self) -> list:
         """Collection of rlxnix.DataLink objects for each stimulus presented in this ReproRun.
 
         Returns
@@ -92,10 +93,13 @@ class ReProRun(TraceContainer):
         """
         data_links = []
         for s in tqdm(self.stimuli, disable=not(logging.root.level == logging.INFO)):
-            data_links.append(s.data_link())
+            dl = s.data_link()
+            if dl is not None:
+                data_links.append(dl)
         return data_links
 
-    def data_link(self):
+    @property
+    def data_link(self) -> DataLink:
         """ Returns a DataLink object to the data recorded in this ReproRun
 
         Returns

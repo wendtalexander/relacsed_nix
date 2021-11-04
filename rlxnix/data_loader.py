@@ -161,16 +161,19 @@ def load_data_segment(data_link : DataLink, trace_name : str, before=0.0, after=
     block = nf.blocks[data_link.block_id]
 
     tag = None
-    if data_link.segment_type == SegmentType.ReproRun:
+    if SegmentType[data_link.segment_type] is SegmentType.ReproRun:
         if data_link.tag_id not in block.tags:
             logging.error(f"Tag with id {data_link.tag_id} is not found in {block}!")
             return None, None
         tag = block.tags[data_link.tag_id]
-    else:
+    elif SegmentType[data_link.segment_type] is SegmentType.StimulusSegment:
         if data_link.tag_id not in block.multi_tags:
             logging.error(f"MultiTag with id {data_link.tag_id} is not found in {block}!")
             return None, None
-        tag = block.multi_tag[data_link.tag_id]
+        tag = block.multi_tags[data_link.tag_id]
+    else:
+        logging.error(f"load_data_segment: Segment type ({data_link.segment_type}) is invalid! Allowed values are {SegmentType.StimulusSegment} or {SegmentType.ReproRun}!")
+        return None, None
 
     if trace_name not in tag.references:
         logging.error(f"The given tag does not refer to a trace {trace_name}! Or a trace with that name does not exist (traces are: {tag.references})!")

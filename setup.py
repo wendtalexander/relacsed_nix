@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import find_packages, setup
 
 NAME = "rlxnix"
 VERSION = 0.5
@@ -11,19 +11,14 @@ README = "README.md"
 with open(README) as f:
     description_text = f.read()
 
-packages = [
-    "rlxnix",
-]
-
 install_req = ["nixio>=1.5", "pandas", "matplotlib", "numpy", "tqdm"]
-
 setup(
     name=NAME,
     version=VERSION,
     description=DESCRIPTION,
     author=AUTHOR,
     author_email=CONTACT,
-    packages=packages,
+    packages=find_packages(),
     install_requires=install_req,
     include_package_data=True,
     long_description=description_text,

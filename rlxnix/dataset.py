@@ -10,7 +10,7 @@ from .stimulus import Stimulus
 from .mappings import DataType, type_map
 from .repro import ReProRun
 from .timeline import Timeline
-from .util import nix_metadata_to_dict
+from .util import data_links_to_pandas, nix_metadata_to_dict
 from .data_trace import DataTrace
 from .buffers import MetadataBuffer, FeatureBuffer
 
@@ -252,8 +252,20 @@ class Dataset(object):
             date = str(dt.datetime.fromtimestamp(self._nixfile.created_at))
         return date
 
+    def data_links(self, include_repros=True):
+        dls = []
+        for r in self.repro_runs():
+            if include_repros:
+                dls.append(r.data_link)
+            dls.extend(r.stimulus_data_links)
+        return dls
+
+    def to_pandas(self, include_repros=True):
+        dls = self.data_links(include_repros)
+        return data_links_to_pandas(dls)
+
     @property
-    def metadata(self):
+    def metadata(self) -> dict:
         """Get the Metadata associated with this recording. Dict entries are the respective property name as key and value is a tuple of the property's values and the unit if provided.
 
         Returns
@@ -264,7 +276,7 @@ class Dataset(object):
         mdata = nix_metadata_to_dict(self._block.metadata)
         return mdata
 
-    def plot_timeline(self):
+    def plot_timeline(self) -> None:
         self._timeline.plot()
 
     def __str__(self) -> str:
@@ -278,7 +290,7 @@ class Dataset(object):
         repr = "Dataset object for file {name:s} at {id}"
         return repr.format(name=self.name, id=hex(id(self)))
 
-    def __del__(self):
+    def __del__(self) -> None:
         """make sure, the nix-file is closed.
         """
         if self.is_open:

@@ -1,7 +1,8 @@
 {
-    "VERSION": "0.5",
+    "NAME": "rlxnix",
+    "VERSION": "0.5.1",
     "STATUS": "dev",
-    "RELEASE": "0.5_dev",
+    "RELEASE": "0.5.1_dev",
     "AUTHOR": "Jan Grewe",
     "COPYRIGHT": "2021, Neuroethology lab Uni Tuebingen, Jan Grewe",
     "CONTACT": "jan.grewe@g-node.org",

@@ -5,7 +5,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 
 from .efish_ephys_repro import EfishEphys
-from ...util import convert_path
+from ...utils.util import convert_path
 
 
 class FileStimulus(EfishEphys):

@@ -1,4 +1,4 @@
-from ...repro import ReProRun
+from ...base.repro import ReProRun
 
 class ReceptiveField(ReProRun):
     _repro_name = "ReceptiveField"

@@ -4,9 +4,9 @@ from tqdm import tqdm
 
 from .trace_container import TraceContainer, TimeReference
 from .stimulus import Stimulus
-from .util import nix_metadata_to_dict, metadata_to_json
-from .data_trace import DataType
-from .data_loader import DataLink, SegmentType
+from ..utils.util import nix_metadata_to_dict, metadata_to_json
+from ..utils.data_trace import DataType
+from ..utils.data_loader import DataLink, SegmentType
 
 
 class ReProRun(TraceContainer):

@@ -1,10 +1,12 @@
 from setuptools import find_packages, setup
 
-NAME = "rlxnix"
-VERSION = 0.5
-AUTHOR = "Jan Grewe"
-CONTACT = "jan.grewe@g-node.org"
-DESCRIPTION = "Reader for relacs written nix files"
+from rlxnix.info import infodict
+
+NAME = infodict["NAME"]
+VERSION = infodict["VERSION"]
+AUTHOR = infodict["AUTHOR"]
+CONTACT = infodict["CONTACT"]
+DESCRIPTION =  infodict["BRIEF"]
 
 classifiers = [
     'Development Status :: 3 - Alpha',
@@ -18,6 +20,7 @@ with open(README) as f:
     description_text = f.read()
 
 install_req = ["nixio>=1.5", "pandas", "matplotlib", "numpy", "tqdm"]
+
 setup(
     name=NAME,
     version=VERSION,

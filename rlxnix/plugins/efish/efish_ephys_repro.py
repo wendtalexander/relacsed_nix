@@ -1,9 +1,7 @@
 import nixio
-import numpy as np
-import matplotlib.pyplot as plt
 
-from ...repro import ReProRun
-from ...mappings import DataType
+from ...base.repro import ReProRun
+from ...utils.mappings import DataType
 
 
 class EfishEphys(ReProRun):

@@ -1,11 +1,10 @@
 import warnings
 import numpy as np
 
-from ...repro import ReProRun
-from ...mappings import DataType, type_map
+from ...base.repro import ReProRun
+from ...utils.mappings import DataType, type_map
 
 from IPython.terminal.embed import embed
-
 
 
 class Baseline(ReProRun):

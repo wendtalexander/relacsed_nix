@@ -3,8 +3,8 @@ import numpy as np
 from enum import Enum
 import logging
 
-from .mappings import DataType, type_map
-from .buffers import FeatureBuffer
+from ..utils.mappings import DataType, type_map
+from ..utils.buffers import FeatureBuffer
 
 
 class TimeReference(Enum):

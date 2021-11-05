@@ -6,13 +6,13 @@ import datetime as dt
 from tqdm import tqdm
 from importlib import import_module
 
-from .stimulus import Stimulus
-from .mappings import DataType, type_map
-from .repro import ReProRun
-from .timeline import Timeline
-from .util import data_links_to_pandas, nix_metadata_to_dict
-from .data_trace import DataTrace
-from .buffers import MetadataBuffer, FeatureBuffer
+from .base.stimulus import Stimulus
+from .utils.mappings import DataType, type_map
+from .base.repro import ReProRun
+from .utils.timeline import Timeline
+from .utils.util import data_links_to_pandas, nix_metadata_to_dict
+from .utils.data_trace import DataTrace
+from .utils.buffers import MetadataBuffer, FeatureBuffer
 
 from IPython import embed
 

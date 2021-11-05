@@ -1,7 +1,7 @@
 import numpy as np
 from enum import Enum
 import matplotlib.pyplot as plt
-from IPython import embed
+
 
 class IntervalMode(Enum):
     """The IntervalMode defines how Timeline will search for respros.

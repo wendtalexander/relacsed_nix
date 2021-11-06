@@ -8,7 +8,8 @@ class EfishEphys(ReProRun):
 
     def __init__(self, repro_run: nixio.Tag, traces, relacs_nix_version=1.1):
         super().__init__(repro_run, traces, relacs_nix_version=relacs_nix_version)
-    
+        self._spike_times = None
+
     def spikes(self, stimulus_index=None, trace_name="Spikes-1"):
         """Return the spike times for the whole repro run or during a certain stimulus presentation
 
@@ -24,12 +25,15 @@ class EfishEphys(ReProRun):
         numpy ndarray
             The spike times in seconds. Times are relative to stimulus onset.
         """
+        if self._spike_times is not None and stimulus_index is None:
+            return self._spike_times
         self._check_trace(trace_name, DataType.Event)
         if stimulus_index is not None:
             self._check_stimulus(stimulus_index)
             return self.stimuli[stimulus_index].trace_data(trace_name)[0]
         else:
-            return self.trace_data(trace_name)[0]
+            self._spike_times = self.trace_data(trace_name)[0]
+            return self._spike_times
 
     def local_eod(self, stimulus_index=None, trace_name="LocalEOD-1"):
         """Return the local eod measurement for the whole repro run or during a certain stimulus presentation.
@@ -55,6 +59,28 @@ class EfishEphys(ReProRun):
             return self.stimuli[stimulus_index].trace_data(trace_name)
         else:
             return self.trace_data(trace_name)
+
+    def eod_times(self, stimulus_index=None, trace_name="EOD_events"):
+        """Read the EOD times from file. 
+
+        Parameters
+        ----------
+        stimulus_index : int, optional
+            stimulus index by default None
+        trace_name : str, optional
+            The name of the recorded event trace that stores the EOD times, by default "EOD_events"
+
+        Returns
+        -------
+        numpy.ndarray
+            The EOD times.
+        """
+        self._check_trace(trace_name, DataType.Event)
+        if stimulus_index is not None:
+            self._check_stimulus(stimulus_index)
+            return self.stimuli[stimulus_index].trace_data(trace_name)[0]
+        else:
+            return self.trace_data(trace_name)[0]
 
     def membrane_voltage(self, stimulus_index=None, trace_name="V-1"):
         """Returns the membrane potential measurement for the whole repro run or during a certain stimulus presentation.

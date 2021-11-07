@@ -1,0 +1,11 @@
+{
+    "log_level": "DEBUG",
+    "trace_configs" : {
+        "efish": {
+            "spikes": ["Spikes-3"],
+            "membrane voltage": ["V-3"],
+            "global eod": ["EOD"],
+            "local eod": ["LocalEOD"]
+        }
+    }
+}

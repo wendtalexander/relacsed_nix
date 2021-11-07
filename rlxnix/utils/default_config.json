@@ -1,0 +1,19 @@
+{
+    "log_level": "WARNING",
+    "trace_configs" : {
+        "efish": {
+            "spikes": ["Spikes", "Spikes-1", "Spikes-2"],
+            "membrane voltage": ["V", "V-1", "V-2"],
+            "global eod": ["EOD"],
+            "local eod": ["LocalEOD", "LocalEOD-1", "LocalEOD-2"],
+            "eod times": ["EOD events"],
+            "stimulus": ["GlobalEFieldStimulus"]
+        },
+        "default": {
+            "spikes": ["Spikes", "Spikes-1", "Spikes-2"],
+            "membrane voltage": ["V", "V-1", "V-2"],
+            "global eod": ["EOD"],
+            "local eod": ["LocalEOD", "LocalEOD-1", "LocalEOD-2"]
+        }
+    }
+}

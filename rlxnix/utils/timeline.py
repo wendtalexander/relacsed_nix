@@ -1,7 +1,11 @@
+import logging
 import numpy as np
 from enum import Enum
 import matplotlib.pyplot as plt
 
+from ..utils.mappings import DataType, tag_start_and_extent, type_map
+
+from IPython import embed
 
 class IntervalMode(Enum):
     """The IntervalMode defines how Timeline will search for respros.
@@ -17,7 +21,7 @@ class Timeline(object):
     """
     Class that represents the timeline of the dataset. It contains the start and end times of all repro Runs and all stimulus outputs stored in the recording.
     """
-    def __init__(self, filename, repro_map, stimulus_mtags) -> None:
+    def __init__(self, filename, repro_map, stimulus_mtags, relacs_nix_mapping=1.1) -> None:
         super().__init__()
         self._filename = filename
         self._repro_start_times = np.zeros(len(repro_map))
@@ -27,6 +31,7 @@ class Timeline(object):
         self._stim_stop_times = None
         self._stim_indices = None
         self._stim_names = None
+        self._mapping_version = relacs_nix_mapping
         self._scan_repro_times(repro_map)
         self._scan_stimulus_times(stimulus_mtags)
 
@@ -48,6 +53,7 @@ class Timeline(object):
         return stim_count
 
     def _scan_stimulus_times(self, mtags):
+        stimulus_type = type_map[self._mapping_version][DataType.StimulusSegment]
         total_stim_count = self._total_stim_count(mtags)
         self._stim_start_times = np.zeros(total_stim_count)
         self._stim_stop_times = np.zeros_like(self._stim_start_times)
@@ -55,12 +61,11 @@ class Timeline(object):
         self._stim_indices = np.zeros_like(self._stim_start_times, dtype=int)
         index = 0
         for mt in mtags:
-            if "relacs.stimulus" not in mt.type:
+            if stimulus_type not in mt.type:
+                logging.warn(f"MultiTag type {mt.type} of mt {mt.name} does not match {stimulus_type}")
                 continue
             for i in range(mt.positions.shape[0]):
-                start = mt.positions[i, 0]
-                ext = mt.extents[i, 0] if mt.positions else 0.0
-
+                start, ext = tag_start_and_extent(mt, i, self._mapping_version)
                 self._stim_start_times[index] = start
                 self._stim_stop_times[index] = start + ext
                 self._stim_indices[index] = i
@@ -139,7 +144,6 @@ class Timeline(object):
         """
         if interval_stop is None:
             interval_stop = interval_start
-
         if mode == IntervalMode.Embracing:
             names = self._repro_names[(self._repro_start_times <= interval_start) &
                                       (self._repro_stop_times >= interval_stop)]
@@ -224,12 +228,16 @@ class Timeline(object):
         repro_annotation.set_visible(False)
 
         stimulus_colors = []
+        stimulus_starts = []
         stimulus_extents = []
         for start, stop, name in zip(self._stim_start_times, self._stim_stop_times, self._stim_names):
-            stimulus_extents.append(stop - start)
             r = self.find_repro_runs(start, stop, IntervalMode.Embracing)
+            if len(r) < 1:
+                continue
+            stimulus_starts.append(start)
+            stimulus_extents.append(stop - start)
             stimulus_colors.append(repro_color_map[r[0]])
-        stim_bar_collection = axis.broken_barh(xranges=list(zip(self._stim_start_times, stimulus_extents)),
+        stim_bar_collection = axis.broken_barh(xranges=list(zip(stimulus_starts, stimulus_extents)),
                                                yrange=(0.65, 0.2), facecolors=stimulus_colors, linewidth=0.1,
                                                edgecolor="black", alpha=1)
 

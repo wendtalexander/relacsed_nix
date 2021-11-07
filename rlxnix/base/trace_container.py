@@ -3,7 +3,7 @@ import numpy as np
 from enum import Enum
 import logging
 
-from ..utils.mappings import DataType, type_map
+from ..utils.mappings import DataType, tag_start_and_extent
 from ..utils.buffers import FeatureBuffer
 
 
@@ -49,12 +49,7 @@ class TraceContainer(object):
         self._features = None
         self._trace_map = traces
 
-        if isinstance(self._tag, nixio.MultiTag):
-            self._start_time = self._tag.positions[self._index, 0][0]
-            self._duration = self._tag.extents[self._index, 0][0] if self._tag.extents else 0.0
-        else:
-            self._start_time = self._tag.position[0]
-            self._duration = self._tag.extent[0] if self._tag.extent else 0.0
+        self._start_time, self._duration = tag_start_and_extent(self._tag, self._index, self._mapping_version)
 
     @property
     def name(self) -> str:

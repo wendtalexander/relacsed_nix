@@ -57,6 +57,7 @@ class Dataset(object):
     """
     def __init__(self, filename) -> None:
         super().__init__()
+        self._nixfile = None
         if not os.path.exists(filename):
             logging.error("rlxnix cannot read file %s, does not exist!" % filename)
             raise ValueError("RelacsNIX cannot read file %s, does not exist!" % filename)
@@ -77,6 +78,7 @@ class Dataset(object):
         self._repro_map = {}
         self._metadata_buffer = MetadataBuffer()
         self._feature_buffer = FeatureBuffer()
+
         self._scan_file()
 
     def _scan_stimuli(self):
@@ -126,7 +128,7 @@ class Dataset(object):
         logging.info("Searching repro runs...")
         self._scan_repros()
         logging.info(f"Creating timeline ...")
-        self._timeline = Timeline(self.name, self._repro_map, self._block.multi_tags)
+        self._timeline = Timeline(self.name, self._repro_map, self._block.multi_tags, self._relacs_nix_version)
         logging.info("Sorting stimuli...")
         self._scan_stimuli()
         logging.info("...done")
@@ -214,7 +216,7 @@ class Dataset(object):
         bool
             True if the file is open, False otherwise.
         """
-        return self._nixfile and self._nixfile.is_open()
+        return self._nixfile is not None and self._nixfile.is_open()
 
     @property
     def name(self) -> str:

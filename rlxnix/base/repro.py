@@ -29,6 +29,9 @@ class ReProRun(TraceContainer):
         self._stimuli = []
         self._metadata = None
 
+    def _get_signal_trace_map(self):
+        logging.critical("Repro._get_trace_map must be overwritten!")
+
     @property
     def metadata(self):
         """Returns the metadata for this ReProRun. The settings herein are the base settings of the RePro. They may vary for each stimulus. For a complete view use the ReProRun.stimulus_metadata property.

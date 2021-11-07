@@ -121,7 +121,7 @@ class FileStimulus(EfishEphys):
 
 
     def load_stimulus(self, stimulus_index=0):
-        """Load the stimulus data from the stimulus file. Since the stimulus output might be shorter than the stimulus one needs to provide the stimulus index for automatic adjustements.
+        """Load the stimulus data from the stimulus file. Since the stimulus output might be shorter than the stimulus one needs to provide the stimulus index for automatic adjustments.
 
         Parameters
         ----------

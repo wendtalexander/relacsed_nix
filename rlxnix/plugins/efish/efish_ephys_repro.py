@@ -2,23 +2,38 @@ import nixio
 
 from ...base.repro import ReProRun
 from ...utils.mappings import DataType
+from ...utils.config import Config
 
 
 class EfishEphys(ReProRun):
+    pluginset = "efish"
+    signals = ["spikes", "membrane voltage", "local eod", "global eod", "eod times"]
 
     def __init__(self, repro_run: nixio.Tag, traces, relacs_nix_version=1.1):
         super().__init__(repro_run, traces, relacs_nix_version=relacs_nix_version)
+        self._config = Config()
+        self._signal_trace_map = {}
         self._spike_times = None
+        self._get_signal_trace_map()
 
-    def spikes(self, stimulus_index=None, trace_name="Spikes-1"):
-        """Return the spike times for the whole repro run or during a certain stimulus presentation
+    def _get_signal_trace_map(self):
+        for s in self.signals:
+            signal_traces = self._config.trace_configuration(self.pluginset, s)
+            if signal_traces is not None:
+                for t in self.traces:
+                    if t in signal_traces:
+                        self._signal_trace_map[s] = t
+
+
+    def spikes(self, stimulus_index=None, trace_name=None):
+        """Return the spike times for the whole repro run or during a certain stimulus presentation.
 
         Parameters
         ----------
         stimulus_index : int, optional
             The stimulus index. If None, the spikes of the whole repro run will be read from file. By default None.
         trace_name : str, optional
-            The name of the spikes event trace, by default "Spikes-1"
+            The name of the spikes event trace, by default None, i.e. try to find the default traces.
 
         Returns
         -------
@@ -27,7 +42,10 @@ class EfishEphys(ReProRun):
         """
         if self._spike_times is not None and stimulus_index is None:
             return self._spike_times
+        if trace_name is None:
+            trace_name = self._signal_trace_map.get("spikes")
         self._check_trace(trace_name, DataType.Event)
+
         if stimulus_index is not None:
             self._check_stimulus(stimulus_index)
             return self.stimuli[stimulus_index].trace_data(trace_name)[0]
@@ -35,7 +53,7 @@ class EfishEphys(ReProRun):
             self._spike_times = self.trace_data(trace_name)[0]
             return self._spike_times
 
-    def local_eod(self, stimulus_index=None, trace_name="LocalEOD-1"):
+    def local_eod(self, stimulus_index=None, trace_name=None):
         """Return the local eod measurement for the whole repro run or during a certain stimulus presentation.
 
         Parameters
@@ -43,7 +61,7 @@ class EfishEphys(ReProRun):
         stimulus_index :  int, optional
             The stimulus index. If None, the spikes of the whole repro run will be read from file. By default None.
         trace_name : str, optional
-            The name of the spikes event trace, by default "LocalEOD-1"
+            The name of the spikes event trace, by default None, i.e. will try to read the deafault from the configuration.
 
         Returns
         -------
@@ -52,15 +70,17 @@ class EfishEphys(ReProRun):
         np.ndarray
             the respective time axis
         """
+        if trace_name is None:
+            trace_name = self._signal_trace_map.get("local eod")
         self._check_trace(trace_name, data_type=DataType.Continuous)
-        
+
         if stimulus_index is not None:
             self._check_stimulus(stimulus_index)
             return self.stimuli[stimulus_index].trace_data(trace_name)
         else:
             return self.trace_data(trace_name)
 
-    def eod_times(self, stimulus_index=None, trace_name="EOD_events"):
+    def eod_times(self, stimulus_index=None, trace_name=None):
         """Read the EOD times from file. 
 
         Parameters
@@ -68,13 +88,15 @@ class EfishEphys(ReProRun):
         stimulus_index : int, optional
             stimulus index by default None
         trace_name : str, optional
-            The name of the recorded event trace that stores the EOD times, by default "EOD_events"
+            The name of the recorded event trace that stores the EOD times, by default None, i.e. read trace name from configuration file.
 
         Returns
         -------
         numpy.ndarray
             The EOD times.
         """
+        if trace_name is None:
+            trace_name = self._signal_trace_map.get("eod times")
         self._check_trace(trace_name, DataType.Event)
         if stimulus_index is not None:
             self._check_stimulus(stimulus_index)
@@ -82,7 +104,7 @@ class EfishEphys(ReProRun):
         else:
             return self.trace_data(trace_name)[0]
 
-    def membrane_voltage(self, stimulus_index=None, trace_name="V-1"):
+    def membrane_voltage(self, stimulus_index=None, trace_name=None):
         """Returns the membrane potential measurement for the whole repro run or during a certain stimulus presentation.
 
         Parameters
@@ -90,7 +112,7 @@ class EfishEphys(ReProRun):
         stimulus_index : int, optional
             The stimulus index. If None, the voltage trace of the whole repro run will be read from file. By default None.
         trace_name : str, optional
-            The name of the membrane voltage trace, by default "V-1"
+            The name of the membrane voltage trace, by default None, i.e. will try the trace specified in the configurations.
 
         Returns
         -------
@@ -99,15 +121,17 @@ class EfishEphys(ReProRun):
         np.ndarray
             the respective time axis
         """
+        if trace_name is None:
+            trace_name = self._signal_trace_map.get("membrane voltage")
         self._check_trace(trace_name, data_type=DataType.Continuous)
-        
+
         if stimulus_index is not None:
             self._check_stimulus(stimulus_index)
             return self.stimuli[stimulus_index].trace_data(trace_name)
         else:
             return self.trace_data(trace_name)
 
-    def stimulus_output(self, stimulus_index=None, trace_name="GlobalEFieldStimulus"):
+    def stimulus_output(self, stimulus_index=None, trace_name=None):
         """Returns the recorded stimulus trace for the whole repro run or during a certain stimulus presentation.
 
         Parameters
@@ -115,7 +139,7 @@ class EfishEphys(ReProRun):
         stimulus_index : int, optional
             The stimulus index. If None, the stimulus trace of the whole repro run will be read from file. By default None.
         trace_name : str, optional
-            The name of the recorded trace, by default "GlobalEFieldStimulus"
+            The name of the recorded trace, by default None, i.e. use the trace specified in the configurations.
 
         Returns
         -------
@@ -124,8 +148,10 @@ class EfishEphys(ReProRun):
         np.ndarray
             the respective time axis
         """
+        if trace_name is None:
+            trace_name = self._signal_trace_map.get("stimulus")
         self._check_trace(trace_name, data_type=DataType.Continuous)
-        
+
         if stimulus_index is not None:
             self._check_stimulus(stimulus_index)
             return self.stimuli[stimulus_index].trace_data(trace_name)

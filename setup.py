@@ -1,6 +1,8 @@
+import os
 from setuptools import find_packages, setup
 
 from rlxnix.info import infodict
+
 
 NAME = infodict["NAME"]
 VERSION = infodict["VERSION"]
@@ -30,6 +32,7 @@ setup(
     classifiers=classifiers,
     packages=find_packages(),
     install_requires=install_req,
+    package_data = {'':['r;xnix/info.json']},
     include_package_data=True,
     long_description=description_text,
     long_description_content_type="text/markdown",

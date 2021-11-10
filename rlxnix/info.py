@@ -14,6 +14,7 @@ here = os.path.dirname(__file__)
 with open(os.path.join(here, "info.json")) as infofile:
     infodict = json.load(infofile)
 
+NAME = infodict["NAME"]
 VERSION = infodict["VERSION"]
 STATUS = infodict["STATUS"]
 RELEASE = infodict["RELEASE"]

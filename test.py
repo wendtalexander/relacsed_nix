@@ -10,7 +10,8 @@ if __name__ == "__main__":
   
     if "macos" in platform.platform().lower():
         # d = rlx.Dataset("/Volumes/pocketbrain/data/2021-09-03-aa-invivo-2/2021-09-03-aa-invivo-2.nix")
-        d = rlx.Dataset("data/2021-07-08-ad-invivo-1.nix")
+        # d = rlx.Dataset("data/2021-07-08-ad-invivo-1.nix")
+        d = rlx.Dataset("/Users/jan/teaching/NIX-Neo-workshop/2018-11-09-aa-invivo-1.nix")
     else:
         d = rlx.Dataset("/media/grewe/pocketbrain/data/2021-09-03-bv-invivo-2/2021-09-03-bv-invivo-2.nix")
         #d = rlx.Dataset("/data/invivo/2021-08-03-ab-invivo-1/2021-08-03-ab-invivo-1.nix")
@@ -18,22 +19,21 @@ if __name__ == "__main__":
     if len(sam_runs) > 0: 
         sam = sam_runs[0]
         sam_stim0 = sam.stimuli[0]
-        print(sam_stim0.id)
-        print(sam_stim0.repro_tag_id)
         data, time = sam_stim0.trace_data("LocalEOD-1")
         sam_spikes, _ = sam_stim0.trace_data("Spikes-1")
-        
+
         plt.plot(time, data)
         plt.scatter(sam_spikes, np.ones_like(sam_spikes)*np.max(data), color="tab:red")
+        plt.show()
 
     baseline_data = d.repro_runs("baseline", False)
     if len(baseline_data) > 0:
-        bd, bt = baseline_data[0].trace_data("V-1")
-        spike_times, _ = baseline_data[0].trace_data("Spikes-1")
+        bd, bt = baseline_data[0].membrane_voltage()
+        spike_times = baseline_data[0].spikes()
         plt.plot(bt, bd)
         plt.scatter(spike_times, np.ones_like(spike_times) * np.max(bd))
+        plt.show()
     plt.close()
-
 
     chirps = d.repro_runs("Eigen", exact=False)
     if len(chirps) > 0:

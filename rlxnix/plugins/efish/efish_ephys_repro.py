@@ -1,3 +1,4 @@
+from IPython.terminal.embed import embed
 import nixio
 
 from ...base.repro import ReProRun
@@ -7,7 +8,7 @@ from ...utils.config import Config
 
 class EfishEphys(ReProRun):
     pluginset = "efish"
-    signals = ["spikes", "membrane voltage", "local eod", "global eod", "eod times"]
+    signals = ["spikes", "membrane voltage", "local eod", "global eod", "eod times", "stimulus"]
 
     def __init__(self, repro_run: nixio.Tag, traces, relacs_nix_version=1.1):
         super().__init__(repro_run, traces, relacs_nix_version=relacs_nix_version)

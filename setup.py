@@ -32,7 +32,7 @@ setup(
     classifiers=classifiers,
     packages=find_packages(),
     install_requires=install_req,
-    package_data = {'':['rlxnix/info.json'], "rlxnix": ['utils/default_config.json']},
+    package_data = {"rlxnix": ['utils/default_config.json'], 'rlxnix':['info.json']},
     include_package_data=True,
     long_description=description_text,
     long_description_content_type="text/markdown",

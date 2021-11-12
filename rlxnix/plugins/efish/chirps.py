@@ -31,6 +31,31 @@ class Chirps(EfishEphys):
         return cts, unit
 
     @property
+    def beat_specification(self):
+        """Returns the way the beat is specified. Will return either *absolute frequency* or "Relative EODf".
+        In the first case the beat frequency is given by the *delta_f* property, in the latter by the *relative_eodf* property.
+
+        Returns
+        -------
+        str
+            the beat selection setting of the Chirps RePro.
+        """
+        spec = self.metadata["RePro-Info"]["settings"]["beatsel"][0][0]
+        return spec
+
+    @property
+    def relative_eodf(self):
+        """The beat frequency specified relative to the EOD frequency of the fish.
+
+        Returns
+        -------
+        float
+            the releodf setting of the repro run.
+        """
+        rel = self.metadata["RePro-Info"]["settings"]["releodf"][0][0]
+        return rel
+
+    @property
     def delta_f(self):
         """The difference frequency to the recorded fish's EOD frequency for all stimulus presentations
 

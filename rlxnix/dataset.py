@@ -165,7 +165,7 @@ class Dataset(object):
         """
         return self._data_traces
 
-    def repro_runs(self, repro_name=None, exact=True) -> list:
+    def repro_runs(self, repro_name=None, exact=False) -> list:
         """Returns the RePro class instances providing access to data and metadata of the repro runs.
 
         Paramters
@@ -173,7 +173,7 @@ class Dataset(object):
             repro_name : str, optional
                 The name of the desired RePro run. If not given, all repro runs are returned. Defaults to None.
             exact : bool, optional
-                If True, the name must be an exact match to the actually run RePro runs. If False, all possible matches are returned. Defaults to True.
+                If True, the name must be an exact match to the actually run RePro runs. If False, all possible matches (case insensitive and repro_name must be part of the name) are returned. Defaults to False.
 
         Returns
         -------

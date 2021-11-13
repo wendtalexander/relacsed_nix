@@ -118,7 +118,7 @@ class ReProRun(TraceContainer):
 
         dl = DataLink(dataset, block_id, tag_id, type, self.start_time,
                       self.stop_time, metadata=mdata,
-                      relacs_nix_mapping_version=self._mapping_version)
+                      mapping_version=self._mapping_version)
         return dl
 
     def _check_stimulus(self, stimulus_index):

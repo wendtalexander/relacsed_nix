@@ -219,7 +219,7 @@ class Stimulus(TraceContainer):
             The DataLink object.
         """
         if self.start_time >= self.stop_time:
-            logging.warning(f"Creating DataLink object for stimulus {self.name} fails because stimulus start time {self.start_time} is <= stimulus stop time {self.stop_time}!")
+            logging.warning(f"Creating DataLink object for stimulus {self.name} fails because stimulus start time {self.start_time} is >= stimulus stop time {self.stop_time}!")
             return None
         dataset = self._tag._parent.name + ".nix"
         block_id = self._tag._parent.id
@@ -231,7 +231,7 @@ class Stimulus(TraceContainer):
         dl = DataLink(dataset, block_id, tag_id, type, self.start_time,
                       self.stop_time, index=self._index, 
                       max_before=before, max_after=after, metadata=mdata,
-                      relacs_nix_mapping_version=self._mapping_version)
+                      mapping_version=self._mapping_version)
         return dl
 
     def __str__(self) -> str:

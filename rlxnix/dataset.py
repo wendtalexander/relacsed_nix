@@ -86,8 +86,11 @@ class Dataset(object):
             r = self._repro_map[k]
             stimulus_start = r.start_time
             stimulus_stop = r.start_time + r.duration
-            stimulus_names, stimulus_indices, _, stimulus_stops = self._timeline.find_stimuli(stimulus_start, stimulus_stop)
-            for name, index, stop in zip(stimulus_names, stimulus_indices, stimulus_stops):
+            stimulus_names, stimulus_indices, stimulus_starts, stimulus_stops = self._timeline.find_stimuli(stimulus_start, stimulus_stop)
+            for name, index, start, stop in zip(stimulus_names, stimulus_indices, stimulus_starts, stimulus_stops):
+                if start >= stop:
+                    logging.warning(f"Dataset: not creating stimulus for stimulus {name} because start time ({start}) is >= stop time ({stop})!")
+                    continue
                 mt = self._block.multi_tags[name]
                 next_stimulus_start = self._timeline.next_stimulus_start(stop)
                 s = Stimulus(mt, self._trace_map, index, next_stimulus_start, self._relacs_nix_version)
@@ -202,6 +205,7 @@ class Dataset(object):
         """Close the nix file, if open. Note: Once the file is closed accessing the data via one of the repro run classes will not work!
         """
         if self._nixfile.is_open():
+            self._nixfile.flush()
             self._nixfile.close()
         self._nixfile = None
         self._metadata_buffer.clear()
@@ -255,6 +259,18 @@ class Dataset(object):
         return date
 
     def data_links(self, include_repros=True):
+        """Returns a list of DataLink objects for reproRun and StimulusSegment entities in the dataset.
+
+        Parameters
+        ----------
+        include_repros : bool, optional
+            Whether or not to include the ReProRuns, by default True
+
+        Returns
+        -------
+        list of DataLink 
+            DataLink objects.
+        """
         dls = []
         for r in self.repro_runs():
             if include_repros:
@@ -263,6 +279,18 @@ class Dataset(object):
         return dls
 
     def to_pandas(self, include_repros=True):
+        """Exports the DataLinks to all data segments stored in the dataset to a pandas DataFrame
+
+        Parameters
+        ----------
+        include_repros : bool, optional
+            Whether or not to include the ReProRuns, by default True
+
+        Returns
+        -------
+        pandas.DataFrame
+            The data frame
+        """
         dls = self.data_links(include_repros)
         return data_links_to_pandas(dls)
 

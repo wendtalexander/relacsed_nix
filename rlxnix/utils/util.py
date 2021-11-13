@@ -15,13 +15,36 @@ def nix_metadata_to_dict(section):
     return info
 
 
-def np_encoder(object):
+def np_encoder(object : np.generic):
+    """Makes sure to properly convert numpy types for the json dump
+
+    Parameters
+    ----------
+    object : Any
+        any numpy data object
+
+    Returns
+    -------
+    python native
+        the object as python native equivalent
+    """
     if isinstance(object, np.generic):
         return object.item()
 
 
-def metadata_to_json(dict):
-    return json.dumps(dict, default=np_encoder)
+def metadata_to_json(metadata_dict: dict)->str:
+    """Dumps a dictionary to json
+
+    Parameters
+    ----------
+    metadata_dict : dict
+        The metadata dictionary
+    Returns
+    -------
+    str
+        A json string.
+    """
+    return json.dumps(metadata_dict, default=np_encoder)
 
 
 def is_windows_path(path):
@@ -43,7 +66,19 @@ def convert_path(path):
     return converted
 
 
-def data_links_to_pandas(data_links):
+def data_links_to_pandas(data_links) -> pd.DataFrame:
+    """Export the rlxnix.DataLink objects to a pandas.DataFrame.
+
+    Parameters
+    ----------
+    data_links : list of DataLink
+        DataLinks of stimulus segments or ReproRuns.
+
+    Returns
+    -------
+    pd.DataFrame
+        The DataFrame
+    """
     df_list = []
     for dl in tqdm(data_links, disable=not(logging.root.level == logging.INFO)):
         df_list.append(dl.to_pandas())

@@ -8,7 +8,7 @@ from .utils.config import Config
 from .info import VERSION, AUTHOR
 
 _config = Config()
-logging.basicConfig(level=_config.log_level())
+logging.basicConfig(level=logging._nameToLevel[_config.log_level()], force=True)
 
 __version__ = VERSION
 __author__ = AUTHOR

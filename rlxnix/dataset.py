@@ -2,6 +2,7 @@ import nixio
 import os
 import inspect
 import logging
+import weakref
 import datetime as dt
 from tqdm import tqdm
 from importlib import import_module
@@ -13,8 +14,6 @@ from .utils.timeline import Timeline
 from .utils.util import data_links_to_pandas, nix_metadata_to_dict
 from .utils.data_trace import DataTrace
 from .utils.buffers import MetadataBuffer, FeatureBuffer
-
-from IPython import embed
 
 
 def scan_plugins():
@@ -64,6 +63,7 @@ class Dataset(object):
         logging.info(f"Dataset: opening nix file {filename}")
         self._filename = filename
         self._nixfile = nixio.File.open(filename, nixio.FileMode.ReadOnly)
+        weakref.finalize(self._nixfile, self.close)
         self._block = self._nixfile.blocks[0]
         if "relacs-nix version" in self._block.metadata:
             self._relacs_nix_version = self._block.metadata["relacs-nix version"]
@@ -204,7 +204,9 @@ class Dataset(object):
     def close(self):
         """Close the nix file, if open. Note: Once the file is closed accessing the data via one of the repro run classes will not work!
         """
-        if self._nixfile.is_open():
+        logging.debug("Closing NIX file!")
+        
+        if self._nixfile is not None and self._nixfile.is_open():
             self._nixfile.flush()
             self._nixfile.close()
         self._nixfile = None
@@ -319,9 +321,3 @@ class Dataset(object):
     def __repr__(self) -> str:
         repr = "Dataset object for file {name:s} at {id}"
         return repr.format(name=self.name, id=hex(id(self)))
-
-    def __del__(self) -> None:
-        """make sure, the nix-file is closed.
-        """
-        if self.is_open:
-            self.close()

@@ -4,11 +4,12 @@ import logging
 import numpy as np
 import pandas as pd
 from enum import Enum
+from typing import Optional, Tuple
 
 from .util import convert_path
 from .mappings import DataType, type_map
 
-
+from IPython import embed
 class SegmentType(Enum):
     ReproRun = "ReproRun"
     StimulusSegment = "StimulusSegment"
@@ -18,36 +19,44 @@ class SegmentType(Enum):
 
 
 class DataLink(object):
-    """Instances of this class contain all information needed to uniquely identify a data segment and read it from file.
+    """Instances of this class contain all information needed to uniquely identify a data segment and read it from a NIX file.
     """
+    _cols = ["dataset_name", "block_id", "tag_id", "segment_type", "start_time", "stop_time", "index", "max_before", "max_after", "mapping_version", "metadata"]
+
+    
     def __init__(self, dataset_name : str, block_id : str, tag_id : str, segment_type : SegmentType,
-                 start_time : float, stop_time : float, index=None, max_before= 0.0, max_after=0.0, metadata=None, relacs_nix_mapping_version=1.1) -> None:
-        """[summary]
+                 start_time : float, stop_time : float, index=None, max_before= 0.0, max_after=0.0, metadata=None, mapping_version=1.1) -> None:
+        """DataLink object that uniquely identifies a segment of the data in a relacs recorded nix file.
 
         Parameters
         ----------
         dataset_name : str
-            [description]
+            The name of the dataset (without any path information)
         block_id : str
-            [description]
+            The id of the nixio.Block entity that contains the data segment.
         tag_id : str
-            [description]
+            The id of the nixio.Tag or nixio.MultiTag entity that tags the data.
         segment_type : SegmentType
-            [description]
+            The segment type specifies whether the given DataLink points to a stimulus segment or the full repro run.
         start_time : float
-            [description]
+            The start time of the segment (in data time, not real time).
         stop_time : float
-            [description]
+            The stop time of the segment (again, data time, not real time).
         index : int, optional
-            [description], by default None
+            The stimulus index, only needed for stimulus segments, by default None
         max_before : float, optional
             The maximum time before that can be read. Defaults to 0.0
         max_after : float, optional
             The maximum time after stimulus onset that can be read. Defaults to 0.0
         metadata : str, optional
             The metadata belonging to the data segment. e.g. in JSON
-        relacs_nix_mapping_version: float
+        mapping_version: float
             The mapping version from relacs to nix files.
+        
+        Raises
+        ------
+        ValueError
+            If stop_time is less or equal start_time
         """
         super().__init__()
         self._dataset_name = dataset_name
@@ -56,95 +65,161 @@ class DataLink(object):
         self._segment_type = segment_type
         self._start_time = start_time
         self._stop_time = stop_time
-        assert(self._stop_time > self._start_time)
+        if self._stop_time <= self._start_time:
+            logging.error(f"DataLink: trying to create a DataLink to a {self._segment_type:s} with the stop time {self._stop_time} less or equal to the {self._start_time}!")
+            raise ValueError(f"DataLink: trying to create a DataLink to a {self._segment_type:s} with the stop time {self._stop_time} less or equal to the {self._start_time}!")
         self._index = index
         self._max_before = max_before
         self._max_after = max_after
         self._metadata = metadata
-        self._mapping_version = relacs_nix_mapping_version
+        self._mapping_version = mapping_version
 
     @property
-    def dataset(self):
+    def dataset_name(self)->str:
         return self._dataset_name
 
     @property
-    def block_id(self):
+    def block_id(self)->str:
         return self._block_id
 
     @property
-    def tag_id(self):
+    def tag_id(self)->str:
         return self._tag_id
 
     @property
-    def segment_type(self):
+    def segment_type(self)->str:
         return str(self._segment_type)
 
     @property
-    def start_time(self):
+    def start_time(self)->float:
         return self._start_time
 
     @property
-    def stop_time(self):
+    def stop_time(self)->float:
         return self._stop_time
 
     @property
-    def index(self):
+    def index(self)->Optional[int]:
         return self._index
+
+    @property
+    def mapping_version(self)->float:
+        return self._mapping_version
+
+    @property
+    def max_before(self)->float:
+        return self._max_before
+
+    @property
+    def max_after(self)->float:
+        return self._max_after
+
+    @property
+    def metadata(self)->dict:
+        return self._metadata
 
     @property
     def mapping_version(self):
         return self._mapping_version
 
-    @property
-    def max_before(self):
-        return self._max_before
-
-    @property
-    def max_after(self):
-        return self._max_after
-
-    @property
-    def metadata(self):
-        return self._metadata
-
     @staticmethod
     def columns()->list:
-        cols = ["dataset", "block_id", "tag_id", "segment_type", "start_time", "stop_time", "index", "max_before", "max_after", "mapping_version", "metadata"]
-        return cols
+        return DataLink._cols
 
-    def to_pandas(self):
+    def to_pandas(self)->pd.DataFrame:
         cols = self.columns()
         values = [getattr(self, c) for c in cols]
-        
+
         return pd.DataFrame([values], columns=cols)
+
+    @staticmethod
+    def from_pandas(data_frame : pd.DataFrame, index : int):
+        """Creates a DataLink object from a row in a data_frame. E.g. from the data frame created by exporting the contents of a rlxnix.Dataset (to_pandas).
+
+        Parameters
+        ----------
+        data_frame : pandas.DataFrame
+            The data frame
+        index : int
+            The index of the respective row.
+
+        Returns
+        -------
+        DataLink
+            The DataLink for the entry.
+        """
+        if index not in data_frame.index:
+            logging.error(f"from_pandas: index {index} is invalid in data_frame")
+            return None
+        specs = {}
+        row = data_frame[data_frame.index == index]
+        for c in DataLink.columns():
+            if c not in data_frame.columns:
+                logging.error(f"DataLink.from_pandas: required column {c} not in data frame!")
+                raise ValueError(f"DataLink.from_pandas: required column {c} not in data frame!")
+            specs[c] = row[c].values[0]
+        link = DataLink(**specs)
+
+        return link
 
     def __repr__(self) -> str:
         repr = "DataLink for {type}, {id} of dataset {name} from {start:.4f}s to {stop:.4f}s at {self_id}"
-        return repr.format(type=str(self.segment_type), id=self.tag_id, name=self.dataset,
+        return repr.format(type=str(self.segment_type), id=self.tag_id, name=self.dataset_name,
                            start=self.start_time, stop=self.stop_time, self_id=hex(id(self)))
 
 
+def from_pandas(data_frame: pd.DataFrame, index: Optional[int] = None, segment_type : Optional[SegmentType] =None) -> DataLink:
+    """Creates a DataLink object from a row in a data_frame. E.g. from the data frame created by exporting the contents of a rlxnix.Dataset (to_pandas).
+
+    Parameters
+    ----------
+    data_frame : pandas.DataFrame
+        The data frame
+    index : int, optional
+        The index of the respective row. If None all entries will be converted.
+    segment_type : SegmentType, optional
+        If index is not specified one can restrict the selection based on the SegmentType. Defaults to None, that is, all entries will be selected.
+    
+    Returns
+    -------
+    DataLink or list of DataLink entities
+        The DataLink for the entry(entries).
+    """
+    if index is None:
+        if segment_type is not None:
+            df = data_frame[data_frame.segment_type == str(segment_type)]
+            return [DataLink.from_pandas(df, index) for index in df.index]
+        else:
+            return [DataLink.from_pandas(data_frame, index) for index in data_frame.index]
+    else:
+        return DataLink.from_pandas(data_frame, index)
+
+
 def load_data_segment(data_link : DataLink, trace_name : str, before=0.0, after=0.0,
-                      data_location="."):
-    """[summary]
+                      data_location=".")->Tuple[np.ndarray, Optional[np.ndarray]]:
+    """Loads the data specified from the DataLink (link to a stimulus or repro run segment) and the trace name. Optionally one can ask to return more data by specifying a before and/or after time. If these are invalid (because there was no data recorded before or after the respective segment) they will be reset to zero or the maximal possible values. 
+
+    The DataLink object contains only the name of the dataset not its location of the hard drive. The data location must be specified, if the dataset is not located in the present directory.
 
     Parameters
     ----------
     data_link : DataLink
-        [description]
+        The DataLink object pointing at the selected data segment.
     trace_name : str
-        [description]
+        The name of the recorded signal that should be read.
     before : float, optional
-        [description], by default 0.0
+        If possible, read data from before segment start, by default 0.0
     after : float, optional
-        [description], by default 0.0
+        If possible, also read the data after segment stop, by default 0.0
     data_location : str, optional
-        [description], by default ".", i.e. the present working directory
+        The folder where to find the dataset, by default ".", i.e. the present working directory
 
     Returns
     -------
-    [type]
-        [description]
+    np.ndarray
+        The data read from the trace (trace_name).
+    np.ndarray or None
+        The respective time axis if the data trace is continuous data trace, None, otherwise.
     """
     converted_path = convert_path(data_link.dataset)
     filename  = converted_path.split(os.sep)[-1]

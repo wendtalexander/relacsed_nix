@@ -12,7 +12,7 @@
 
 The *Dataset* class is the linchpin of the exploratory functionality offered by **rlxnix**. Upon creation of a Dataset instance, it will crawl through the file and index it, **this may take a little while**.
 
-To get an initial overview, one can plot the timeline which shows which *RePro* was run when and illustrated the stimulus segments within the RePro runs. 
+To get an initial overview, one can plot the timeline which shows which *RePro* was run when and illustrated the stimulus segments within the RePro runs.
 
 ```python
 import rlxnix as rlx
@@ -54,28 +54,6 @@ print(dataset.metadata)
   'Mode': (['Simulation'], ''),
   'Software': (['RELACS'], ''),
   'Software version': (['0.9.8'], '')},
- 'Cell': {'CellType': (['P-unit'], ''),
-  'Structure': (['Nerve'], ''),
-  'Cell properties': {'Firing Rate1': ([59.539170506912434], 'Hz'),
-   'P-Value1': ([0.07436559827719443], ''),
-   'X Position': ([0.0], 'mm'),
-   'Y Position': ([0.0], 'mm')}},
- 'Subject': {'Species': (['Apteronotus leptorhynchus'], ''),
-  'Sex': (['unknown'], ''),
-  'Size': ([18.0], 'cm'),
-  'Weight': ([20.0], 'g'),
-  'Identifier': (['2020lepto25'], ''),
-  'EOD Frequency': ([800.6278694213264], 'Hz'),
-  'Snout Position': ([0.0], 'mm'),
-  'Tail Position': ([0.0], 'mm')},
- 'Setup': {'Identifier': (['Setup1'], ''),
-  'Maintainer': (['Your name'], ''),
-  'Creator': (['Whoever'], ''),
-  'Location': (['virtual'], ''),
-  'Lab': (['XYZ-Lab'], ''),
-  'Institute': (['Your institute'], ''),
-  'University': (['Your university'], ''),
-  'Address': (["Your institute's address"], '')},
 
         ...
 
@@ -224,7 +202,7 @@ sam_eod, sam_time = sam.trace_data("LocalEOD-1")
 Let's plot the data...
 
 ```python
-fig, axis = plt.subplots(figsize=(5, 2))
+fig, axis = plt.subplots(figsize=(5, 2), constrained_layout=True)
 axis.plot(sam_time, sam_eod, lw=0.25, label="local eod")
 axis.scatter(sam_spike_times, np.ones_like(sam_spike_times) * 1.1 * np.max(sam_eod), color="tab:orange", s=15, label="Spikes")
 axis.set_xlabel("time [s]")
@@ -235,7 +213,7 @@ plt.show()
 
 ![SAM RePro](./images/sam_activity.png)
 
-As we can see during the RePro data contains several segments some, at which the *local eod* amplitude is stable, and others in which it is (sinusoidally) modulated. The latter are the times in which a stimulus was active.
+The SAM RePro ran for a little more than 2 seconds. In this time, we observe several distinct segments in the data at which the *local eod* amplitude is stable, and others in which it is (sinusoidally) modulated. The latter are the times in which a stimulus was active.
 
 ## ``rlxnix.base.Stimulus`` class represents stimulus segments
 
@@ -276,7 +254,7 @@ To read the data we can apply exactly the same methods as before (for those inte
 sam_stim_spike_times, _ = stimulus.trace_data("Spikes-1")
 sam_stim_eod, sam_stim_time = stimulus.trace_data("LocalEOD-1")
 
-fig, axis = plt.subplots(figsize=(5, 2))
+fig, axis = plt.subplots(figsize=(5, 2), constrained_layout=True)
 axis.plot(sam_stim_time, sam_stim_eod, lw=0.25, label="local eod")
 axis.scatter(sam_stim_spike_times, np.ones_like(sam_stim_spike_times) * 1.1 * np.max(sam_stim_eod), color="tab:orange", s=15, label="Spikes")
 axis.set_xlabel("time [s]")

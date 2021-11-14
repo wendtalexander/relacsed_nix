@@ -12,6 +12,7 @@ markdown_extensions:
     - markdown_include.include
     
 nav:
-    - Home: 'index.md'
-    - Installation: 'installation.md'
+    - Home: 'index.html'
+    - Installation: 'installation/index.html'
+    - Tutorial: 'introduction/index.html'
     - API reference: 'api/index.html'

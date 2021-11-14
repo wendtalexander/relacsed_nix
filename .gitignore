@@ -5,3 +5,5 @@ build
 *.egg-info
 .vscode
 .DS_Store
+site
+*.afdesign

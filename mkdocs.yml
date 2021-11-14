@@ -1,0 +1,28 @@
+site_name: rlxnix
+site_url: https://example.com/
+
+repo_url: https://github.com/relacs/relacsed_nix
+
+edit_uri: ""
+
+site_author: Jan Grewe
+
+theme: readthedocs
+
+markdown_extensions:
+    - markdown_include.include
+    
+nav:
+    - Home: 'index.md'
+    - Installation: 'installation.md'
+    - About: 'contact.md'
+    - User Guide:
+      - Introduction: 'introduction.md'
+      - File exploration:
+        - The Dataset object: 'file_exploration.md'
+        - The ReProRun object: 'repro_run.md'
+        - The Stimulus object: 'stimuli.md'
+      - Data retrieval in production:
+        - Export to pandas: 'export.md'
+      - Subclassing ReProRun: 'subclassing.md'
+    - API reference: api/index.html

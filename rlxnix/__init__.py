@@ -15,3 +15,14 @@ __author__ = AUTHOR
 __all__ = ["Dataset", "TimeReference", "IntervalMode", 
            "data_links_to_pandas", "from_pandas", "load_data_segment",
            "_config"]
+
+
+def set_log_level(level_name):
+    """Set the log level manually.
+
+    Parameters
+    ----------
+    level_name : str
+        The desired log level. Options are ``CRITICAL``, ``ERROR``, ``WARNING``, ``INFO``, and ``DEBUG``.
+    """
+    logging.basicConfig(level=logging._nameToLevel[level_name], force=True)

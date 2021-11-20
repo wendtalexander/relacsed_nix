@@ -7,4 +7,3 @@
 3. *Stimulus*: The Stimulus object offers access to the concrete stimulus settings (the metadata) and the data recorded during the stimulus presentations.
 
 ![Object structure](./images/structure.png)
-

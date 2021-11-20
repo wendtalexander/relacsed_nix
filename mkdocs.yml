@@ -25,4 +25,5 @@ nav:
       - Data retrieval in production:
         - Export to pandas: 'export.md'
       - Writing ReProRun subclasses: 'subclassing.md'
+      - Configurations: config.md
     - API reference: api/index.html

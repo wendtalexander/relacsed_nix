@@ -89,7 +89,7 @@ class Dataset(object):
             stimulus_names, stimulus_indices, stimulus_starts, stimulus_stops = self._timeline.find_stimuli(stimulus_start, stimulus_stop)
             for name, index, start, stop in zip(stimulus_names, stimulus_indices, stimulus_starts, stimulus_stops):
                 if start >= stop:
-                    logging.warning(f"Dataset: not creating stimulus for stimulus {name} because start time ({start}) is >= stop time ({stop})!")
+                    logging.info(f"Dataset: not creating stimulus for stimulus {name} because start time ({start}) is >= stop time ({stop})!")
                     continue
                 mt = self._block.multi_tags[name]
                 next_stimulus_start = self._timeline.next_stimulus_start(stop)
@@ -204,14 +204,12 @@ class Dataset(object):
     def close(self):
         """Close the nix file, if open. Note: Once the file is closed accessing the data via one of the repro run classes will not work!
         """
-        logging.debug("Closing NIX file!")
-        
         if self._nixfile is not None and self._nixfile.is_open():
             self._nixfile.flush()
             self._nixfile.close()
         self._nixfile = None
-        self._metadata_buffer.clear()
-        self._feature_buffer.clear()
+        self._metadata_buffer.clear(False)
+        self._feature_buffer.clear(False)
 
     @property
     def is_open(self) -> bool:

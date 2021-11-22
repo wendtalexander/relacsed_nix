@@ -36,18 +36,6 @@ class Beats(EfishEphys):
         return freqs
 
     @property
-    def duration(self):
-        """The duration of the stimulus in seconds.
-
-        Returns
-        -------
-        d: float
-            The duration of the stimulus in seconds.
-        """
-        d = self.metadata["RePro-Info"]["settings"]["duration"][0][0]
-        return d
-
-    @property
     def pause(self):
         """The pause between stimuli in seconds.
 
@@ -93,7 +81,7 @@ class Beats(EfishEphys):
             The multiple of EODf
         """
         m = self.metadata["RePro-Info"]["settings"]["eodmult"][0][0]
-        return r
+        return m
 
     @property
     def amplitude(self):
@@ -106,4 +94,5 @@ class Beats(EfishEphys):
         unit: str
         """
         a = self.metadata["RePro-Info"]["settings"]["amplitude"][0][0]
-        return r
+        unit = self.metadata["RePro-Info"]["settings"]["amplitude"][1]
+        return a, unit

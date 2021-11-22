@@ -34,9 +34,10 @@ class MetadataBuffer(metaclass=Singleton):
             logging.debug(f"MetadataBuffer: did not find metadata for tag {tag_id}!")
             return None
 
-    def clear(self):
+    def clear(self, show_log=True):
         self._buffer.clear()
-        logging.debug(f"MetadataBuffer cleared! {len(self._buffer)}")
+        if show_log:
+            logging.debug(f"MetadataBuffer cleared! {len(self._buffer)}")
 
 
 class FeatureBuffer(metaclass=Singleton):
@@ -66,6 +67,7 @@ class FeatureBuffer(metaclass=Singleton):
             logging.debug(f"FeatureBuffer: did not find Feature {feature_name} for tag {tag_id}!")
             return None
 
-    def clear(self):
-        logging.debug("FeatureBuffer cleared!")
+    def clear(self, show_log=True):
+        if show_log:
+            logging.debug("FeatureBuffer cleared!")
         self._buffer.clear()

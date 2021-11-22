@@ -1,4 +1,3 @@
-from IPython.terminal.embed import embed
 import nixio
 
 from ...base.repro import ReProRun
@@ -7,6 +6,13 @@ from ...utils.config import Config
 
 
 class EfishEphys(ReProRun):
+    """Superclass that bundles some common data access methods for electrophysiological data recorded by running one of the relacs/efish plugins.
+
+    It defines methods to get the commonly recorded data and event traces directly. These are the membrane voltage, the spikes, the eod-times, the local and global eod recordings and the stimulus output. It handles the mapping from the trace names in the nix file. E.g. Action potential times (spikes) are often stored in the event traces Spikes or Spikes-1. 
+    Some of these name mappings are provided in the ``rlxnix.utils.default_config.json`` file. They can be overwritten by local configurations.
+
+    Any subclass will inherit this functionality.
+    """
     pluginset = "efish"
     signals = ["spikes", "membrane voltage", "local eod", "global eod", "eod times", "stimulus"]
 
@@ -25,6 +31,7 @@ class EfishEphys(ReProRun):
                     if t in signal_traces:
 
                         self._signal_trace_map[s] = t
+
     def spikes(self, stimulus_index=None, trace_name=None):
         """Return the spike times for the whole repro run or during a certain stimulus presentation.
 
@@ -72,6 +79,33 @@ class EfishEphys(ReProRun):
         """
         if trace_name is None:
             trace_name = self._signal_trace_map.get("local eod")
+        self._check_trace(trace_name, data_type=DataType.Continuous)
+
+        if stimulus_index is not None:
+            self._check_stimulus(stimulus_index)
+            return self.stimuli[stimulus_index].trace_data(trace_name)
+        else:
+            return self.trace_data(trace_name)
+
+    def eod(self, stimulus_index=None, trace_name=None):
+        """Return the global eod measurement for the whole repro run or during a certain stimulus presentation.
+
+        Parameters
+        ----------
+        stimulus_index :  int, optional
+            The stimulus index. If None, the spikes of the whole repro run will be read from file. By default None.
+        trace_name : str, optional
+            The name of the spikes event trace, by default None, i.e. will try to read the deafault from the configuration.
+
+        Returns
+        -------
+        np.ndarray 
+            the local eod data
+        np.ndarray
+            the respective time axis
+        """
+        if trace_name is None:
+            trace_name = self._signal_trace_map.get("global eod")
         self._check_trace(trace_name, data_type=DataType.Continuous)
 
         if stimulus_index is not None:

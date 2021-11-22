@@ -32,7 +32,7 @@ echo "Building general documentation for $PACKAGE"
 echo
 
 cd "$PACKAGEROOT"
-mkdocs build --config-file .mkdocs.yml --site-dir "$BUILDROOT" 
+mkdocs build --config-file mkdocs.yml --site-dir "$BUILDROOT" 
 cd - > /dev/null
 
 echo

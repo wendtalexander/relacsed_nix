@@ -221,7 +221,7 @@ def load_data_segment(data_link : DataLink, trace_name : str, before=0.0, after=
     np.ndarray or None
         The respective time axis if the data trace is continuous data trace, None, otherwise.
     """
-    converted_path = convert_path(data_link.dataset)
+    converted_path = convert_path(data_link.dataset_name)
     filename  = converted_path.split(os.sep)[-1]
     converted_path = os.sep.join((data_location, filename))
 

@@ -105,7 +105,7 @@ class Stimulus(TraceContainer):
                         continue
                     feature_unit = self._tag.features[index].data.unit
                     update_metadata(mdata[self.name], suffix, feature_data.ravel().tolist(), feature_unit)
-        self._metadata_buffer.put(stimulus_id, mdata.copy())
+        self._metadata_buffer.put(stimulus_id, mdata.opy())
 
         return mdata
 

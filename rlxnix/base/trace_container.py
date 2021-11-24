@@ -30,7 +30,7 @@ class TraceContainer(object):
         traces: map of rlxnix.DataTrace
             Map of DataTrace infos.
         index: int, optional
-            The index in the Stimulus tag that relates to the stimulus.
+            The index in the Stimulus tag that relates to the stimulus. Defaults to None.
         relace_nix_version: float
             The relacs to nix mapping version, Defaults to 1.1
         """

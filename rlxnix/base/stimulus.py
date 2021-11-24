@@ -31,7 +31,6 @@ class Stimulus(TraceContainer):
         super().__init__(stimulus_multi_tag, index, traces, relacs_nix_version=relacs_nix_version)
         self._multi_tag = stimulus_multi_tag
         self._metadata_buffer = MetadataBuffer()
-        self._metadata = None
         self._absolute_starttime = None
         self._delay = None
         self._next_stimulus_start = next_stimulus_start
@@ -89,13 +88,13 @@ class Stimulus(TraceContainer):
                     else:
                         logging.error(f"Could not find subdict for key {parts[0]}! Skipping")
 
-        if self._metadata is None:
-            if self._metadata_buffer.has(self.id):
-                metadata = self._metadata_buffer.get(self.id)
-            else:
-                metadata = nix_metadata_to_dict(self._tag.metadata)
-                self._metadata_buffer.put(self.id, metadata.copy())
-
+        stimulus_id = self.id + f"_{self._index}"
+        if self._metadata_buffer.has(stimulus_id):
+            mdata = self._metadata_buffer.get(stimulus_id)
+            logging.debug("Stimulus: got metadata from buffer")
+        else:
+            logging.debug("Stimulus: metadata not found, creating reading from file")
+            mdata = nix_metadata_to_dict(self._tag.metadata)
             for index, name, type in self.features:
                 if "mutable" in type:
                     suffix = name.split(self.name + "_")[-1]
@@ -105,9 +104,10 @@ class Stimulus(TraceContainer):
                         logging.error(f"Could not read feature data for {name}! Skipped!")
                         continue
                     feature_unit = self._tag.features[index].data.unit
-                    update_metadata(metadata[self.name], suffix, feature_data.ravel().tolist(), feature_unit)
-            self._metadata = metadata
-        return self._metadata
+                    update_metadata(mdata[self.name], suffix, feature_data.ravel().tolist(), feature_unit)
+        self._metadata_buffer.put(stimulus_id, mdata.copy())
+
+        return mdata
 
     @property
     def absolute_start_time(self) -> float:

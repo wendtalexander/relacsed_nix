@@ -314,6 +314,15 @@ class Dataset(object):
     def plot_timeline(self) -> None:
         self._timeline.plot()
 
+    def __contains__(self, key):
+        return key in self.repros
+
+    def __getitem__(self, key):
+        if not key in self:
+            raise KeyError(f"Key {key} not found in list of run repros!")
+        else:
+            return self.repro_runs(key, exact=True)[0]
+
     def __str__(self) -> str:
         info = "{n:s}\n\tlocation: {l:s}\n\trecording data: {rd:s}\n\tfile size {s:.2f} MB"
         return info.format(**{"n": self.name.split(os.sep)[-1],

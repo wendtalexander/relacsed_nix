@@ -100,7 +100,12 @@ class Dataset(object):
         for tag in tqdm(self._block.tags, disable=not(logging.root.level == logging.INFO)):
             if "relacs.repro_run" not in tag.type:
                 continue
-            p = tag.metadata.sections[0]["RePro"]
+            if "RePro" in tag.metadata.sections[0]:
+                p = tag.metadata.sections[0]["RePro"]
+            elif "repro" in tag.metadata.sections[0]:
+                p = tag.metadata.sections[0]["repro"]
+            else:
+                raise KeyError(f"Neither 'repro' nor 'RePro' key found in tag {tag} metadata!")
             if isinstance(p, bytes):
                 repro_name = p.decode()
             else:

@@ -22,7 +22,10 @@ class DataTrace(object):
         self._shape = data_array.shape
         self._sampling_interval = None
         if self._trace_type == DataType.Event:
-            self._max_time = data_array[-1]
+            if sum(data_array.shape) > 0:
+                self._max_time = data_array[-1]
+            else:
+                self._max_time = 0.0
         else:
             self._max_time = self._shape[0] * data_array.dimensions[0].sampling_interval
             self._sampling_interval = data_array.dimensions[0].sampling_interval

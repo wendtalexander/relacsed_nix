@@ -315,13 +315,19 @@ class Dataset(object):
         self._timeline.plot()
 
     def __contains__(self, key):
-        return key in self.repros
+        if isinstance(key, int):
+            return key < len(self._repro_runs)
+        elif isinstance(key, str):
+            return key in self.repros
+        raise KeyError(f"Invalid key! Key {key} is not str or int.")
 
     def __getitem__(self, key):
         if not key in self:
-            raise KeyError(f"Key {key} not found in list of run repros!")
-        else:
+            raise KeyError(f"Key {key} not found in list of repro runs!")
+        if isinstance(key, str):
             return self.repro_runs(key, exact=True)[0]
+        else:
+            return self._repro_runs[i]
 
     def __str__(self) -> str:
         info = "{n:s}\n\tlocation: {l:s}\n\trecording data: {rd:s}\n\tfile size {s:.2f} MB"

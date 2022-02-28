@@ -171,7 +171,7 @@ class Stimulus(TraceContainer):
         return feat
 
     def trace_data(self, name, before=0.0, after=0.0, reference=TimeReference.Zero):
-        """Get the data that was recorded while this stimulus was put out. With before and after, the timespan can be extended. before must not be larger than the delay, stimulus stop + after must not reach into the next stimulus start. They will be automatically adjusted.
+        """Get the data that was recorded while this stimulus was put out. With before and after, the timespan can be extended. 'before' must not be larger than the delay, stimulus stop + after must not reach into the next stimulus start. They will be automatically adjusted.
 
         Paramters
         ---------
@@ -198,7 +198,7 @@ class Stimulus(TraceContainer):
         if (before > 0.0) and (before > self.delay):
             logging.warning(f"stimulus.trace_data before {before} is larger than delay {self.delay}, before is set to delay!")
             before = self.delay
-        if self.next_stimulus_start is None:
+        if self.next_stimulus_start is None and after > 0.0:
             logging.warning(f"stimulus.trace_data after {after} is too large! There is no next stimulus, after is set to zero!")
             after = 0.0
             max_after = 0.0

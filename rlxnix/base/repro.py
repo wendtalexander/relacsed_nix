@@ -57,7 +57,7 @@ class ReProRun(TraceContainer):
 
     @property
     def stimuli(self):
-        """List of stimuli run in the context of this RePro Run.
+        """List of stimuli that were presented within the context of this RePro Run.
 
         Returns:
         --------
@@ -139,3 +139,10 @@ class ReProRun(TraceContainer):
     def __repr__(self) -> str:
         repr = "ReproRun object for repro run {name} from {start:.4f} to {stop:.4f}s, Tag {id} at {pos}." 
         return repr.format(name=self.name, start=self.start_time, stop=self.stop_time, id=self.repro_tag.id, pos=hex(id(self)))
+
+    def __getitem__(self, key) -> Stimulus:
+        if isinstance(key, int):
+            return self._stimuli[i]
+        else:
+            raise KeyError(f"Key is invalid! {key} is not instance of int.")
+

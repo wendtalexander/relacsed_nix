@@ -142,7 +142,7 @@ class ReProRun(TraceContainer):
 
     def __getitem__(self, key) -> Stimulus:
         if isinstance(key, int):
-            return self._stimuli[i]
+            return self._stimuli[key]
         else:
             raise KeyError(f"Key is invalid! {key} is not instance of int.")
 

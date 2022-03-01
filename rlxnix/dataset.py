@@ -71,7 +71,6 @@ class Dataset(object):
         else:
             self._relacs_nix_version = 1.0
         self._baseline_data = []
-        self._repro_runs = []
         self._event_traces = []
         self._data_traces = []
         self._trace_map = {}
@@ -316,7 +315,7 @@ class Dataset(object):
 
     def __contains__(self, key):
         if isinstance(key, int):
-            return key < len(self._repro_runs)
+            return key < len(self._repro_map.keys())
         elif isinstance(key, str):
             return key in self.repros
         raise KeyError(f"Invalid key! Key {key} is not str or int.")
@@ -327,7 +326,7 @@ class Dataset(object):
         if isinstance(key, str):
             return self.repro_runs(key, exact=True)[0]
         else:
-            return self._repro_runs[i]
+            return self.repro_runs()[key]
 
     def __str__(self) -> str:
         info = "{n:s}\n\tlocation: {l:s}\n\trecording data: {rd:s}\n\tfile size {s:.2f} MB"

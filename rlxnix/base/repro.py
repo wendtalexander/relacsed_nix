@@ -146,3 +146,5 @@ class ReProRun(TraceContainer):
         else:
             raise KeyError(f"Key is invalid! {key} is not instance of int.")
 
+    def __len__(self) -> int:
+        return len(self.stimuli)

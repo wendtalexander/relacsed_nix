@@ -45,6 +45,7 @@ class Stimulus(TraceContainer):
         str
             the Repro Tag id.
         """
+        repro_id = None
         feat_name = "_".join((self.name, "repro_tag_id"))
         if feat_name in self._tag.features:
             repro_id = self.feature_data(feat_name).ravel()[0]
@@ -198,12 +199,13 @@ class Stimulus(TraceContainer):
         if (before > 0.0) and (before > self.delay):
             logging.warning(f"stimulus.trace_data before {before} is larger than delay {self.delay}, before is set to delay!")
             before = self.delay
-        if self.next_stimulus_start is None and after > 0.0:
-            logging.warning(f"stimulus.trace_data after {after} is too large! There is no next stimulus, after is set to zero!")
-            after = 0.0
-            max_after = 0.0
-        else:
-            max_after = self.next_stimulus_start - self.stop_time
+        if after > 0.0:
+            if self.next_stimulus_start is None:
+                logging.warning(f"stimulus.trace_data after {after} is too large! There is no next stimulus, after is set to zero!")
+                after = 0.0
+                max_after = 0.0
+            else:
+                max_after = self.next_stimulus_start - self.stop_time
         if after > 0.0 and after > max_after:
             logging.warning(f"stimulus.trace_data after {np.round(after, 5)} is too large! after is set to next stimulus time - stimulus stop time {np.round(max_after, 5)}!")
             after = max_after
@@ -242,4 +244,4 @@ class Stimulus(TraceContainer):
 
     def __repr__(self) -> str:
         repr = "Stimulus object for stimulus output from {start:.4f} to {stop:.4f}s of MultiTag {id} at {pos}"
-        return repr.format(start=self.start_time, stop=self.stop_time, id=self.repro_tag_id, pos=hex(id(self)))
+        return repr.format(start=self.start_time, stop=self.stop_time, id=self.id, pos=hex(id(self)))

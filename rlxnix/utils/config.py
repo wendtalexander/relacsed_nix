@@ -56,7 +56,7 @@ class Config(metaclass=Singleton):
         if self.trace_configuration_name in config_dict.keys():
             c_dict = config_dict[self.trace_configuration_name]
             if plugin in c_dict:
-                logging.info(f"Config found key {plugin} in config {plugin in c_dict}!")
+                logging.debug(f"Config found key {plugin} in config {plugin in c_dict}!")
                 cfg = c_dict.get(plugin, None)
                 if cfg is not None:
                     if signal is not None:

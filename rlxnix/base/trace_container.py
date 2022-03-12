@@ -202,7 +202,10 @@ class TraceContainer(object):
 
         logging.debug(f"TraceContainer._trace_data: get data slice from {np.round(self.start_time - before, 5)} to {np.round(segment_stop_time, 5)}")
 
-        data = ref.data_array.get_slice([self.start_time - before], [self.duration + after + before], nixio.DataSliceMode.Data)[:]
+        try:
+            data = ref.data_array.get_slice([self.start_time - before], [self.duration + after + before], nixio.DataSliceMode.Data)[:]
+        except:
+            data = []
         time = None
 
         if ref.trace_type == DataType.Continuous:  
@@ -243,11 +246,13 @@ class TraceContainer(object):
         if isinstance(self._tag, nixio.MultiTag) and self._index is not None:
             logging.debug(f"reading feature data from {name} with index {self._index}")
             feat_data = buffered_data[self._index]
-            # feat_data = self._tag.feature_data(self._index, name)
         elif isinstance(self._tag, nixio.Tag):
             logging.debug(f"reading feature data from {name}")
-            # feat_data = self._tag.feature_data(name)
             feat_data = buffered_data
         else:
             raise ValueError(f"TraceContainer, feature_data: something went wrong, no Index? Tag: {self._tag}, Index:{self._index}")
-        return feat_data[:]
+
+        if isinstance(feat_data, (nixio.DataArray, nixio.Feature)):
+            return feat_data[:]
+        else:
+            return feat_data

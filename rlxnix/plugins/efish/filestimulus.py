@@ -31,10 +31,16 @@ class FileStimulus(EfishEphys):
     def contrast(self):
         # in _mapping_version <= 1.1 this is part of the repro, in future versions the contrast information may move to the features...
         c = 0.0
-        unit = "%"
+        unit = ""
         logging.debug("Filestimulus: trying to read contrast from metadata")
         if "contrast" in self.metadata["RePro-Info"]["settings"]:
-            c = self.metadata["RePro-Info"]["settings"]["contrast"][0][0] * 100
+            vals, unit = self.metadata["RePro-Info"]["settings"]["contrast"]
+            if len(unit.strip()) == 0:
+                c = vals[0] * 100
+                unit = "%"
+            else:
+                c = vals[0]
+                unit = unit.strip()
         else:
             logging.error("Filestimulus.contrast: could not find the contrast property!")
         return c, unit

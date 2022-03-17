@@ -12,7 +12,7 @@ from .utils.mappings import DataType, type_map
 from .base.repro import ReProRun
 from .utils.timeline import Timeline
 from .utils.util import data_links_to_pandas, nix_metadata_to_dict
-from .utils.data_trace import DataTrace
+from .utils.data_trace import DataTrace, TraceList
 from .utils.buffers import MetadataBuffer, FeatureBuffer
 
 
@@ -71,8 +71,8 @@ class Dataset(object):
         else:
             self._relacs_nix_version = 1.0
         self._baseline_data = []
-        self._event_traces = []
-        self._data_traces = []
+        self._event_traces = TraceList()
+        self._data_traces = TraceList()
         self._trace_map = {}
         self._repro_map = {}
         self._metadata_buffer = MetadataBuffer()

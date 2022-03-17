@@ -2,6 +2,7 @@ import os
 import nixio
 import logging
 import numpy as np
+from numpy import full
 from scipy.interpolate import interp1d
 
 from .efish_ephys_repro import EfishEphys
@@ -33,7 +34,17 @@ class FileStimulus(EfishEphys):
         c = 0.0
         unit = ""
         logging.debug("Filestimulus: trying to read contrast from metadata")
-        if "contrast" in self.metadata["RePro-Info"]["settings"]:
+        if "RePro-Info" not in self.metadata:
+            settings = self.repro_tag.metadata.find_sections(lambda s: s.type == "settings")
+            if len(settings) > 0:
+                cp = settings[0].props["contrast"]
+                if cp.unit is None or len(cp.unit) == 0:
+                    c = cp.values[0] * 100
+                    unit = "%"
+                else:
+                    c = cp.values[0]
+                    unit = cp.unit
+        elif "contrast" in self.metadata["RePro-Info"]["settings"]:
             vals, unit = self.metadata["RePro-Info"]["settings"]["contrast"]
             if len(unit.strip()) == 0:
                 c = vals[0] * 100
@@ -49,7 +60,11 @@ class FileStimulus(EfishEphys):
     def stimulus_filename(self):
         name = None
         logging.debug("Filestimulus: trying to read stimulus file from metadata")
-        if "file" in self.metadata["RePro-Info"]["settings"]:
+        if "RePro-Info" not in self.metadata:
+            settings = self.repro_tag.metadata.find_sections(lambda s: s.type == "settings")
+            if len(settings) > 0:
+                name = settings[0]["file"]
+        elif "file" in self.metadata["RePro-Info"]["settings"]:
             name = self.metadata["RePro-Info"]["settings"]["file"][0][0]
         else:
             logging.error("Filestimulus.stimulus_filename: could not find the stimulus file property!")
@@ -156,6 +171,7 @@ class FileStimulus(EfishEphys):
         if not os.path.exists(full_file) or not os.path.isfile(full_file):
             logging.error(f"FileStimulus: Stimulus file {full_file} does not exist")
             return None, None
+
         s = self._read_stimulus_file(full_file)
         logging.debug("Filestimulus: successfully parsed stimulus file {full_file}")
 

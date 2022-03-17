@@ -104,3 +104,21 @@ class DataTrace(object):
 
     def __repr__(self) -> str:
         return "DataTrace (Name: %r, DataArray: %r, DataType: %r)" % (self.name, self.data_array.id, self.trace_type)
+
+
+class TraceList(list):
+    def __init_subclass__(cls) -> None:
+        return super().__init_subclass__()
+
+    def __contains__(self, __o: object) -> bool:
+        if isinstance(__o, str):
+            return any([dt.name == __o for dt in self])
+        if isinstance(__o, DataTrace):
+            return any([dt.name == __o.name for dt in self])
+        return super().__contains__(__o)
+
+    def append(self, trace):
+        if not isinstance(trace, DataTrace):
+            raise ValueError("TraceList can only accommodate DataTrace objects!")
+        super().append(trace)
+

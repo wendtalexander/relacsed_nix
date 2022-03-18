@@ -117,6 +117,15 @@ class TraceList(list):
             return any([dt.name == __o.name for dt in self])
         return super().__contains__(__o)
 
+    def __getitem__(self, index) -> DataTrace:
+        if isinstance(index, str):
+            for dt in self:
+                if dt.name == index:
+                    return dt
+            raise KeyError(f"Provided key {index} is not valid in this list.")
+        else:
+            return super().__getitem__(index)
+    
     def append(self, trace):
         if not isinstance(trace, DataTrace):
             raise ValueError("TraceList can only accommodate DataTrace objects!")

@@ -126,11 +126,33 @@ class ReProRun(TraceContainer):
             raise IndexError(f"Stimulus index {stimulus_index} is out of bounds for number of stimuli {len(self.stimuli)}")
 
     def _check_trace(self, trace_name, data_type=DataType.Continuous):
+        """Checks if the provided trace name is among the traces in the file and if the expected data type matches the expectation.
+
+        Parameters
+        ----------
+        trace_name : str
+            The name of the trace.
+        data_type : DataType, optional
+            The expected trace type. If you expect a Continuous data type and the provided name points to event data False will be returned, by default DataType.Continuous
+
+        Returns
+        -------
+        bool
+            True if the trace was found and the data type matches the expectation, False otherwise.
+
+        """
+        if trace_name is None:
+            logging.warning("Repro.check_trace: Trace name is not specified!")
+            return False
         if trace_name not in self._tag.references:
-            raise ValueError(f"Trace {trace_name} not found!")
+            logging.warning(f"Trace {trace_name} not found!")
+            return False
         trace = self._trace_map[trace_name]
         if trace.trace_type != data_type:
-            raise ValueError(f"Data type of trace {trace.name} does not match expected data type (expected: {data_type}, found: {trace.trace_type}).")
+            logging.warning(f"Data type of trace {trace.name} does not match expected data type (expected: {data_type}, found: {trace.trace_type}).")
+            return False
+        return True
+
 
     def __str__(self) -> str:
         info = "Repro: {n:s} \t type: {t:s}\n\tstart time: {st:.2f}s\tduration: {et:.2f}s"

@@ -25,6 +25,9 @@ class Baseline(EfishEphys):
 
     @property
     def eod_frequency(self):
+        if "eod times" not in self._signal_trace_map:
+            logging.warning("EOD times are not stored in the file. You need to detect the eod times manually... ")
+            return None
         return len(self.eod_times()) / self._duration
 
     def serial_correlation(self, max_lags=50):

@@ -1,4 +1,5 @@
 import nixio
+import logging
 
 from ...base.repro import ReProRun
 from ...utils.mappings import DataType
@@ -50,7 +51,10 @@ class EfishEphys(ReProRun):
             return self._spike_times
         if trace_name is None:
             trace_name = self._signal_trace_map.get("spikes")
-        self._check_trace(trace_name, DataType.Event)
+
+        if not self._check_trace(trace_name, DataType.Event):
+            logging.warning("No spikes data found in the file. You probably have to detect them manually...")
+            return None
 
         if stimulus_index is not None:
             self._check_stimulus(stimulus_index)
@@ -78,7 +82,9 @@ class EfishEphys(ReProRun):
         """
         if trace_name is None:
             trace_name = self._signal_trace_map.get("local eod")
-        self._check_trace(trace_name, data_type=DataType.Continuous)
+        if not self._check_trace(trace_name, data_type=DataType.Continuous):
+            logging.warning("EfishEphysRepro.local_eod: the local eod trace was not found!")
+            return None, None
 
         if stimulus_index is not None:
             self._check_stimulus(stimulus_index)
@@ -105,7 +111,9 @@ class EfishEphys(ReProRun):
         """
         if trace_name is None:
             trace_name = self._signal_trace_map.get("global eod")
-        self._check_trace(trace_name, data_type=DataType.Continuous)
+        if not self._check_trace(trace_name, data_type=DataType.Continuous):
+            logging.warning("EfishEphysRepro.eod: the eod trace was not found!")
+            return None, None
 
         if stimulus_index is not None:
             self._check_stimulus(stimulus_index)
@@ -130,7 +138,9 @@ class EfishEphys(ReProRun):
         """
         if trace_name is None:
             trace_name = self._signal_trace_map.get("eod times")
-        self._check_trace(trace_name, DataType.Event)
+        if not self._check_trace(trace_name, DataType.Event):
+            logging.warning("EfishEphys.eod_times: eod times event data was not found in the file. You need to detect them manually.")
+            return None
         if stimulus_index is not None:
             self._check_stimulus(stimulus_index)
             return self.stimuli[stimulus_index].trace_data(trace_name)[0]
@@ -156,7 +166,9 @@ class EfishEphys(ReProRun):
         """
         if trace_name is None:
             trace_name = self._signal_trace_map.get("membrane voltage")
-        self._check_trace(trace_name, data_type=DataType.Continuous)
+        if not self._check_trace(trace_name, data_type=DataType.Continuous):
+            logging.warning("Efish_Ephys.membrane_voltage: Membrane voltage trace was not found in the file.")
+            return None, None
 
         if stimulus_index is not None:
             self._check_stimulus(stimulus_index)
@@ -183,7 +195,9 @@ class EfishEphys(ReProRun):
         """
         if trace_name is None:
             trace_name = self._signal_trace_map.get("stimulus")
-        self._check_trace(trace_name, data_type=DataType.Continuous)
+        if not self._check_trace(trace_name, data_type=DataType.Continuous):
+            logging.warning("EfishEphys.stimulus_output: Stimulus trace was not found in the file.")
+            return None, None
 
         if stimulus_index is not None:
             self._check_stimulus(stimulus_index)

@@ -66,6 +66,10 @@ class ReProRun(TraceContainer):
         """
         return self._stimuli
 
+    @property
+    def stimulus_count(self):
+        return len(self._stimuli)
+
     def trace_data(self, name, reference=TimeReference.Zero):
         """Get the data that was recorded while this repro was run.
 

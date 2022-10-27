@@ -228,6 +228,32 @@ class Dataset(object):
                 matches.append(r)
 
         return matches
+
+    def find_stimuli(self, repro_name, filter_func=lambda s: True, **kwargs):
+        """ Find stimuli that were run in certain repro_runs. The repro runs are selected according to the
+        repro_name and the passed keyword arguments (see function find()).
+        Additionally, a filter function can be passed that filters the stimuli e.g. on duration.
+        
+        Parameters:
+        -----------
+        repro_name: str
+            The name (fragment) the repro.
+        filter_func: function
+            The filter function that is applied to the matching repros.
+        **kwargs: dict
+            The keyword arguments are used to filter the repro runs.
+
+        Returns:
+        --------
+        list of stimuli
+        """
+        repros = self.find(repro_name, **kwargs)
+        matches = []
+        for r in repros:
+            matches.extend([s for s in r if filter_func(s)])
+
+        return matches
+        
     def close(self):
         """Close the nix file, if open. Note: Once the file is closed accessing the data via one of the repro run classes will not work!
         """

@@ -1,7 +1,11 @@
 import os
+import json
+
 from setuptools import find_packages, setup
 
-from rlxnix.info import infodict
+here = os.path.dirname(__file__)
+with open(os.path.join(here, "rlxnix", "info.json"), encoding="utf-8") as infofile:
+    infodict = json.load(infofile)
 
 
 NAME = infodict["NAME"]
@@ -21,8 +25,8 @@ README = "README.md"
 with open(README) as f:
     description_text = f.read()
 
-install_req = ["nixio>=1.5", "pandas", "matplotlib",
-               "numpy", "tqdm", "six", "markdown", "mkdocs"]
+install_req = ["numpy", "scipy", "matplotlib", "pandas", "nixio>=1.5",
+               "tqdm", "markdown", "mkdocs", "ipython"]
 
 setup(
     name=NAME,

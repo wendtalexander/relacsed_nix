@@ -22,11 +22,11 @@ classifiers = [
 ]
 
 README = "README.md"
-with open(README) as f:
+with open(README, encoding="utf-8") as f:
     description_text = f.read()
 
-install_req = ["numpy", "scipy", "matplotlib", "pandas", "nixio>=1.5",
-               "tqdm", "markdown", "mkdocs", "ipython"]
+install_req = ["numpy", "scipy", "matplotlib", "pandas", "h5py",
+               "nixio>=1.5", "tqdm", "markdown", "mkdocs", "ipython"]
 
 setup(
     name=NAME,

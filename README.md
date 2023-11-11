@@ -57,3 +57,29 @@ These classes inherit from rlxnix.ReProRun. If you write your own repro class it
 The easiest way is to install it via pip using the test/pypi package
 
 ```pip install -i https://test.pypi.org/simple/ rlxnix```
+
+## Building and installing form source
+
+```
+git clone https://github.com/relacs/relacsed_nix rlxnix
+pip3 install .
+```
+
+To build the documentation use
+```
+mkdocs build
+```
+or run the shell script
+```
+./build_docs.py
+```
+
+To build and view them locally
+
+```
+mkdocs serve
+```
+
+which builds the documentation and serves them locally under the url ``http://127.0.0.1:8000``.
+
+

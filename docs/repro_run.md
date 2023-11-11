@@ -1,43 +1,45 @@
 # Reading RePro data
 
-From the overview we know that there were several RePro runs in the file and in order to access the data recorded during these we need to get the *ReProRun* entity, e.g. from the BaselineActivity:
+From the overview we know that there were several **RePro** runs in the file and in order to access the data recorded during these, we need to get the *ReProRun* entity, e.g. the BaselineActivity:
 
 ```python
 # get a list of ReProRuns who's names have "Baseline" in it
 baseline_runs = dataset.repro_runs("Baseline")
-baseline_0 = baseline_runs[0]
+baseline = baseline_runs[0]
 
-# if a specific ReProRun is needed:
-baseline_0 = dataset.repro_runs('BaselineActivity_1', exact=True)[0]
+# if a specific ReProRun is required and the name is known:
+baseline = dataset.repro_runs('BaselineActivity_1', exact=True)[0]
 # if exact is "False" (the default), e.g. 'BaselineActivity_12' would also match
+# alternatively, you can directly access the ReproRun by
+baseline = dataset["BaselineActivity_1"]
 ```
 
 ## Easy data access with specialized classes
 
-*relacs* controls the experiments with RePros, collections of RePros are called plugin sets. For example there is (among others) the efish plugin set. **rlxnix** classes made for representing *relacs* RePro data are stored in the ``rlxnix.plugins`` module.
+*relacs* controls the experiments with **RePros**, collections of **RePros** are called plugin sets. For example, there is (among others) the *efish* plugin set. **rlxnix** classes made for representing *relacs* RePro data are stored in the ``rlxnix.plugins`` module.
 
 For the *relacs* BaselineActivity repro there is an **rlxnix** equivalent class (defined in the ``rlxnix.plugins.efish.baseline`` module). Which offers some convenience methods:
 
 ```python
-type(baseline_0)
+type(baseline)
 rlxnix.plugins.efish.baseline.Baseline
 
-print(baseline_0.baseline_rate)
+print(baseline.baseline_rate)
 59.43223443223443
 
 print(baseline.baseline_cv)
 0.07113413039235926
 ```
 
-The ``Baseline`` class provides direct access to the spikes, the local eod and the membrane_voltage.
+The ``Baseline`` class provides direct access to the spikes, the local eod, the global eod, and the membrane_voltage.
 
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
 
-spike_times = baseline_0.spikes()
-membrane_voltage, time = baseline_0.membrane_voltage()
-local_eod, eod_time = baseline_0.local_eod()
+spike_times = baseline.spikes()
+membrane_voltage, time = baseline.membrane_voltage()
+local_eod, eod_time = baseline.local_eod()
 
 fig, axes = plt.subplots(nrows=2, figsize=(5, 3), sharex=True, constrained_layout=True)
 axes[0].plot(eod_time, local_eod, label="eod", lw=0.5)

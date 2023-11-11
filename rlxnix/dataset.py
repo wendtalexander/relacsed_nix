@@ -205,6 +205,55 @@ class Dataset(object):
                     not_found_error(repro_name, exact)
         return matches
 
+    def find(self, repro_name, **kwargs):
+        """Find repro runs according to the repro name, and further settings provided by keyword arguments.
+
+        Parameters
+        ----------
+        repro_name : str
+            The name (fragment) the repro that is passed to self.repro_runs.
+        **kwargs :
+            Keyword arguments are used to filter repros based on the properties exposed by the respective repro classes.
+        """
+        repros = self.repro_runs(repro_name)
+        if len(repros) == 0:
+            print(f"No matching for repro runs for pattern {repro_name}!")
+
+        matches = []
+        for r in repros:
+            match = True
+            for k in kwargs.keys():
+                match = match and (hasattr(r, k) and kwargs[k] in getattr(r, k))
+            if match:
+                matches.append(r)
+
+        return matches
+
+    def find_stimuli(self, repro_name, filter_func=lambda s: True, **kwargs):
+        """ Find stimuli that were run in certain repro_runs. The repro runs are selected according to the
+        repro_name and the passed keyword arguments (see function find()).
+        Additionally, a filter function can be passed that filters the stimuli e.g. on duration.
+        
+        Parameters:
+        -----------
+        repro_name: str
+            The name (fragment) the repro.
+        filter_func: function
+            The filter function that is applied to the matching repros.
+        **kwargs: dict
+            The keyword arguments are used to filter the repro runs.
+
+        Returns:
+        --------
+        list of stimuli
+        """
+        repros = self.find(repro_name, **kwargs)
+        matches = []
+        for r in repros:
+            matches.extend([s for s in r if filter_func(s)])
+
+        return matches
+        
     def close(self):
         """Close the nix file, if open. Note: Once the file is closed accessing the data via one of the repro run classes will not work!
         """

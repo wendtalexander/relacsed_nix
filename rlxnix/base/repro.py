@@ -66,6 +66,32 @@ class ReProRun(TraceContainer):
         """
         return self._stimuli
 
+    def stimulus_duration(self, index=None):
+        """Get the duration of the stimuli presented in this repro run. If no stimulus index is provided, all 
+        stimulus durations are returned.
+        
+        Parameters:
+        -----------
+        index: int, optional
+            The stimulus index. Defaults to None.
+        
+        Returns:
+        --------
+        float or list of float
+            The duration(s)
+
+        Raises:
+        -------
+        IndexError if an index is provided and this is invalid.
+        """
+        if index is not None:
+            if index < len(self):
+                return self[index].duration
+            else:
+                raise IndexError(f"Stimulus index ({index}) passed to function stimulus_duration is out of bounds for {len(self)} stimuli!")
+        else:
+            return [s.duration for s in self.stimuli]
+
     @property
     def stimulus_count(self):
         return len(self._stimuli)

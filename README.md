@@ -82,4 +82,4 @@ mkdocs serve
 
 which builds the documentation and serves them locally under the url ``http://127.0.0.1:8000``.
 
-
+**Note: ** to build the documentation you may need to install the following additional packages: *pydoc3, markdown, markdown_include, mkdocs*.

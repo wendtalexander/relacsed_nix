@@ -1,5 +1,7 @@
+from typing import Optional, Union
 import nixio
 import os
+import pathlib
 import inspect
 import logging
 import weakref
@@ -54,15 +56,20 @@ class Dataset(object):
         for r in dataset.repros:
         print(r)
     """
-    def __init__(self, filename) -> None:
+    def __init__(self, filename: Union[str, pathlib.Path]) -> None:
         super().__init__()
         self._nixfile = None
-        if not os.path.exists(filename):
-            logging.error("rlxnix cannot read file %s, does not exist!" % filename)
-            raise ValueError("RelacsNIX cannot read file %s, does not exist!" % filename)
-        logging.info(f"Dataset: opening nix file {filename}")
+
+        if isinstance(filename, str):
+            filename = pathlib.Path(filename)
+
+        if not filename.exists:
+            logging.error(f"rlxnix cannot read file {filename}, does not exist!")
+            raise ValueError(f"RelacsNIX cannot read file {filename}, does not exist!")
+
         self._filename = filename
-        self._nixfile = nixio.File.open(filename, nixio.FileMode.ReadOnly)
+        logging.info(f"Dataset: opening nix file {filename}")
+        self._nixfile = nixio.File.open(str(filename), nixio.FileMode.ReadOnly)
         weakref.finalize(self._nixfile, self.close)
         self._block = self._nixfile.blocks[0]
         if "relacs-nix version" in self._block.metadata:
@@ -284,7 +291,7 @@ class Dataset(object):
         str
             The full filename
         """
-        return self._filename
+        return str(self._filename.resolve())
 
     @property
     def nix_file(self) -> nixio.File:
@@ -298,18 +305,22 @@ class Dataset(object):
         return self._nixfile if self.is_open else None
 
     @property
-    def recording_date(self) -> str:
+    def recording_date(self) -> Optional[str]:
         """The recording data of the dataset
 
         Returns
         -------
-        str
+        Optional[str]
             iso-format string of the file creation timestamp
         """
         date = None
+        if not self.is_open or not self._nixfile:
+            return None
+
         if self.is_open:
-            date = str(dt.datetime.fromtimestamp(self._nixfile.created_at))
-        return date
+            if self._nixfile:
+                date = str(dt.datetime.fromtimestamp(self._nixfile.created_at))
+                return date
 
     def data_links(self, include_repros=True):
         """Returns a list of DataLink objects for reproRun and StimulusSegment entities in the dataset.
@@ -382,7 +393,7 @@ class Dataset(object):
         return info.format(**{"n": self.name.split(os.sep)[-1],
                               "l": os.sep.join(self.name.split(os.sep)[:-1]),
                               "rd": self.recording_date,
-                              "s": os.path.getsize(self._filename)/1e+6})
+                              "s":  self._filename.stat().st_size / 1e+6})
 
     def __repr__(self) -> str:
         repr = "Dataset object for file {name:s} at {id}"

@@ -86,7 +86,7 @@ class Dataset(object):
         self._scan_file()
 
     def _scan_stimuli(self):
-        for k in tqdm(self._repro_map.keys(), disable=not(log.root.level == log.INFO)):
+        for k in tqdm(self._repro_map.keys(), disable=not(log.root.level == logging.INFO)):
             r = self._repro_map[k]
             stimulus_start = r.start_time
             stimulus_stop = r.start_time + r.duration

@@ -101,7 +101,7 @@ class Dataset(object):
                 r.add_stimulus(s)
 
     def _scan_repros(self):
-        for tag in tqdm(self._block.tags, disable=not(log.root.level == log.INFO)):
+        for tag in tqdm(self._block.tags, disable=not(log.root.level == logging.INFO)):
             if "relacs.repro_run" not in tag.type:
                 continue
             if "RePro" in tag.metadata.sections[0]:

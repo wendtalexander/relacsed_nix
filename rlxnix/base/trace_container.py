@@ -1,10 +1,13 @@
+import logging
+from enum import Enum
+
 import nixio
 import numpy as np
-from enum import Enum
-import logging
 
-from ..utils.mappings import DataType, tag_start_and_extent
 from ..utils.buffers import FeatureBuffer
+from ..utils.mappings import DataType, tag_start_and_extent
+
+log = logging.getLogger(__name__)
 
 
 class TimeReference(Enum):
@@ -13,13 +16,14 @@ class TimeReference(Enum):
         * Absolute: the time axis will be in absolute time
         * Zero: the time axis will is zero at segment start
     """
+
     Absolute = 0
     Zero = 1
 
 
 class TraceContainer(object):
-    """Superclass for classes that are based on nix Tags/MultiTags. Provides some general properties and functions for accessing the data and some basic properties.
-    """
+    """Superclass for classes that are based on nix Tags/MultiTags. Provides some general properties and functions for accessing the data and some basic properties."""
+
     def __init__(self, tag_or_mtag, traces, index=None, relacs_nix_version=1.1) -> None:
         """Constructor of TraceContainer class.
 
@@ -36,7 +40,7 @@ class TraceContainer(object):
         """
         super().__init__()
         if isinstance(tag_or_mtag, nixio.MultiTag) and index is None:
-            logging.error("Index must not be None, if a multiTag is passed!")
+            log.error("Index must not be None, if a multiTag is passed!")
             raise ValueError("Index must not be None, if a multiTag is passed!")
 
         self._tag = tag_or_mtag
@@ -49,7 +53,9 @@ class TraceContainer(object):
         self._features = None
         self._trace_map = traces
 
-        self._start_time, self._duration = tag_start_and_extent(self._tag, self._index, self._mapping_version)
+        self._start_time, self._duration = tag_start_and_extent(
+            self._tag, self._index, self._mapping_version
+        )
 
     @property
     def name(self) -> str:
@@ -79,7 +85,7 @@ class TraceContainer(object):
 
         Returns
         -------
-        string 
+        string
             the type
         """
         return self._tag_type
@@ -90,7 +96,7 @@ class TraceContainer(object):
 
         Returns
         -------
-        float 
+        float
             RePro start time
         """
         return self._start_time
@@ -144,7 +150,9 @@ class TraceContainer(object):
         if trace_name in self._trace_map.keys():
             ti = self._trace_map[trace_name]
         else:
-            logging.error(f"TraceContainer: Key error, {trace_name} is not known trace name!")
+            log.error(
+                f"TraceContainer: Key error, {trace_name} is not known trace name!"
+            )
         return ti
 
     @property
@@ -184,10 +192,14 @@ class TraceContainer(object):
             The respective time vector for continuous traces, None for event traces
         """
         if self.stop_time < self.start_time:
-            logging.warning(f"TraceContainer._trace_data: reading trace data from {name}, slice is invalid! start_time: {self.start_time} stop_time: {self.stop_time}. Interrupted stimulus?")
+            log.warning(
+                f"TraceContainer._trace_data: reading trace data from {name}, slice is invalid! start_time: {self.start_time} stop_time: {self.stop_time}. Interrupted stimulus?"
+            )
             return None, None
 
-        logging.debug(f"TraceContainer._trace_data: reading trace data from {name}, with time reference {reference}")
+        log.debug(
+            f"TraceContainer._trace_data: reading trace data from {name}, with time reference {reference}"
+        )
         if name not in self._tag.references or name not in self._trace_map.keys():
             raise ValueError(f"Could not find {name} in the list of references.")
         ref = self._trace_map[name]
@@ -197,25 +209,33 @@ class TraceContainer(object):
         if ref.trace_type == DataType.Continuous:
             if segment_stop_time > ref.maximum_time:
                 after = ref.maximum_time - self.stop_time
-                logging.warning(f"traceContainer._trace_data: segment stop time ({np.round(segment_stop_time, 5)}) is too large, beyond maximum time in trace {ref.name} ({ref.maximum_time})! reduced after to {np.round(after, 5)}!")
+                log.warning(
+                    f"traceContainer._trace_data: segment stop time ({np.round(segment_stop_time, 5)}) is too large, beyond maximum time in trace {ref.name} ({ref.maximum_time})! reduced after to {np.round(after, 5)}!"
+                )
                 segment_stop_time = self.start_time + self.duration + after
 
-        logging.debug(f"TraceContainer._trace_data: get data slice from {np.round(self.start_time - before, 5)} to {np.round(segment_stop_time, 5)}")
+        log.debug(
+            f"TraceContainer._trace_data: get data slice from {np.round(self.start_time - before, 5)} to {np.round(segment_stop_time, 5)}"
+        )
 
         try:
-            data = ref.data_array.get_slice([self.start_time - before], [self.duration + after + before], nixio.DataSliceMode.Data)[:]
+            data = ref.data_array.get_slice(
+                [self.start_time - before],
+                [self.duration + after + before],
+                nixio.DataSliceMode.Data,
+            )[:]
         except:
             data = []
         time = None
 
-        if ref.trace_type == DataType.Continuous:  
+        if ref.trace_type == DataType.Continuous:
             time = np.array(ref.data_array.dimensions[0].axis(len(data)))
             if reference == TimeReference.Absolute:
-                time += (self.start_time - before)
+                time += self.start_time - before
             else:
                 time -= before
         else:  # event data
-            data -=  0.0 if reference is TimeReference.Absolute else self.start_time
+            data -= 0.0 if reference is TimeReference.Absolute else self.start_time
         return data, time
 
     def feature_data(self, name):
@@ -244,15 +264,18 @@ class TraceContainer(object):
             self._feature_buffer.put(self.id, name, buffered_data)
 
         if isinstance(self._tag, nixio.MultiTag) and self._index is not None:
-            logging.debug(f"reading feature data from {name} with index {self._index}")
+            log.debug(f"reading feature data from {name} with index {self._index}")
             feat_data = buffered_data[self._index]
         elif isinstance(self._tag, nixio.Tag):
-            logging.debug(f"reading feature data from {name}")
+            log.debug(f"reading feature data from {name}")
             feat_data = buffered_data
         else:
-            raise ValueError(f"TraceContainer, feature_data: something went wrong, no Index? Tag: {self._tag}, Index:{self._index}")
+            raise ValueError(
+                f"TraceContainer, feature_data: something went wrong, no Index? Tag: {self._tag}, Index:{self._index}"
+            )
 
         if isinstance(feat_data, (nixio.DataArray, nixio.Feature)):
             return feat_data[:]
         else:
             return feat_data
+

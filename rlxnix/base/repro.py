@@ -1,5 +1,5 @@
-import nixio
 import logging
+import nixio
 from tqdm import tqdm
 
 from .trace_container import TraceContainer, TimeReference
@@ -9,12 +9,14 @@ from ..utils.data_trace import DataType
 from ..utils.data_loader import DataLink, SegmentType
 
 
+log = logging.getLogger(__name__)
+
 class ReProRun(TraceContainer):
     """This class represents the data of a RePro run. It offers access to the data and metadata.
     """
 
     def __init__(self, repro_run: nixio.Tag, traces, relacs_nix_version=1.1):
-        """Create a RePro instance that represent one run of a relacs RePro.
+        """Create a RePro instance that represent one run of a relacs repro.
 
         Parameters
         ----------
@@ -30,7 +32,7 @@ class ReProRun(TraceContainer):
         self._metadata = None
 
     def _get_signal_trace_map(self):
-        logging.critical("Repro._get_trace_map must be overwritten!")
+        log.critical("Repro._get_trace_map must be overwritten!")
 
     @property
     def metadata(self):

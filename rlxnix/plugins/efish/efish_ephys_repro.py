@@ -5,6 +5,7 @@ from ...base.repro import ReProRun
 from ...utils.mappings import DataType
 from ...utils.config import Config
 
+log = logging.getLogger(__name__)
 
 class EfishEphys(ReProRun):
     """Superclass that bundles some common data access methods for electrophysiological data recorded by running one of the relacs/efish plugins.
@@ -53,7 +54,7 @@ class EfishEphys(ReProRun):
             trace_name = self._signal_trace_map.get("spikes")
 
         if not self._check_trace(trace_name, DataType.Event):
-            logging.warning("No spikes data found in the file. You probably have to detect them manually...")
+            log.warning("No spikes data found in the file. You probably have to detect them manually...")
             return None
 
         if stimulus_index is not None:
@@ -83,7 +84,7 @@ class EfishEphys(ReProRun):
         if trace_name is None:
             trace_name = self._signal_trace_map.get("local eod")
         if not self._check_trace(trace_name, data_type=DataType.Continuous):
-            logging.warning("EfishEphysRepro.local_eod: the local eod trace was not found!")
+            log.warning("EfishEphysRepro.local_eod: the local eod trace was not found!")
             return None, None
 
         if stimulus_index is not None:
@@ -112,7 +113,7 @@ class EfishEphys(ReProRun):
         if trace_name is None:
             trace_name = self._signal_trace_map.get("global eod")
         if not self._check_trace(trace_name, data_type=DataType.Continuous):
-            logging.warning("EfishEphysRepro.eod: the eod trace was not found!")
+            log.warning("EfishEphysRepro.eod: the eod trace was not found!")
             return None, None
 
         if stimulus_index is not None:
@@ -139,7 +140,7 @@ class EfishEphys(ReProRun):
         if trace_name is None:
             trace_name = self._signal_trace_map.get("eod times")
         if not self._check_trace(trace_name, DataType.Event):
-            logging.warning("EfishEphys.eod_times: eod times event data was not found in the file. You need to detect them manually.")
+            log.warning("EfishEphys.eod_times: eod times event data was not found in the file. You need to detect them manually.")
             return None
         if stimulus_index is not None:
             self._check_stimulus(stimulus_index)
@@ -167,7 +168,7 @@ class EfishEphys(ReProRun):
         if trace_name is None:
             trace_name = self._signal_trace_map.get("membrane voltage")
         if not self._check_trace(trace_name, data_type=DataType.Continuous):
-            logging.warning("Efish_Ephys.membrane_voltage: Membrane voltage trace was not found in the file.")
+            log.warning("Efish_Ephys.membrane_voltage: Membrane voltage trace was not found in the file.")
             return None, None
 
         if stimulus_index is not None:
@@ -196,7 +197,7 @@ class EfishEphys(ReProRun):
         if trace_name is None:
             trace_name = self._signal_trace_map.get("stimulus")
         if not self._check_trace(trace_name, data_type=DataType.Continuous):
-            logging.warning("EfishEphys.stimulus_output: Stimulus trace was not found in the file.")
+            log.warning("EfishEphys.stimulus_output: Stimulus trace was not found in the file.")
             return None, None
 
         if stimulus_index is not None:

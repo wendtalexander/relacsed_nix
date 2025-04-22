@@ -7,6 +7,7 @@ from ..utils.util import nix_metadata_to_dict, metadata_to_json
 from ..utils.buffers import MetadataBuffer
 from ..utils.data_loader import DataLink, SegmentType
 
+log = logging.getLogger(__name__)
 
 class Stimulus(TraceContainer):
     """Class that represents a single stimulus segment. It provides access to the stimulus metadata and the data traces.
@@ -34,7 +35,7 @@ class Stimulus(TraceContainer):
         self._absolute_starttime = None
         self._delay = None
         self._next_stimulus_start = next_stimulus_start
-        logging.debug(self.__str__())
+        log.debug(self.__str__())
 
     @property
     def repro_tag_id(self):
@@ -87,14 +88,14 @@ class Stimulus(TraceContainer):
                     if mdata is not None:
                         update_metadata(mdata, ".".join(parts[1:]), value, unit)
                     else:
-                        logging.error(f"Could not find subdict for key {parts[0]}! Skipping")
+                        log.error(f"Could not find subdict for key {parts[0]}! Skipping")
 
         stimulus_id = self.id + f"_{self._index}"
         if self._metadata_buffer.has(stimulus_id):
             mdata = self._metadata_buffer.get(stimulus_id)
-            logging.debug("Stimulus: got metadata from buffer")
+            log.debug("Stimulus: got metadata from buffer")
         else:
-            logging.debug("Stimulus: metadata not found, creating reading from file")
+            log.debug("Stimulus: metadata not found, creating reading from file")
             mdata = nix_metadata_to_dict(self._tag.metadata)
             for index, name, type in self.features:
                 if "mutable" in type:
@@ -102,7 +103,7 @@ class Stimulus(TraceContainer):
                     try:
                         feature_data = self.feature_data(name)
                     except:
-                        logging.error(f"Could not read feature data for {name}! Skipped!")
+                        log.error(f"Could not read feature data for {name}! Skipped!")
                         continue
                     feature_unit = self._tag.features[index].data.unit
                     update_metadata(mdata[self.name], suffix, feature_data.ravel().tolist(), feature_unit)
@@ -193,21 +194,21 @@ class Stimulus(TraceContainer):
             The respective time vector for continuous traces, None for event traces
         """
         if not isinstance(before, float) or not isinstance(after, float):
-            logging.error(f"Type of args before and after must be float, got {type(before)} and {type(after)}!")
+            log.error(f"Type of args before and after must be float, got {type(before)} and {type(after)}!")
             return None, None
 
         if (before > 0.0) and (before > self.delay):
-            logging.warning(f"stimulus.trace_data before {before} is larger than delay {self.delay}, before is set to delay!")
+            log.warning(f"stimulus.trace_data before {before} is larger than delay {self.delay}, before is set to delay!")
             before = self.delay
         if after > 0.0:
             if self.next_stimulus_start is None:
-                logging.warning(f"stimulus.trace_data after {after} is too large! There is no next stimulus, after is set to zero!")
+                log.warning(f"stimulus.trace_data after {after} is too large! There is no next stimulus, after is set to zero!")
                 after = 0.0
                 max_after = 0.0
             else:
                 max_after = self.next_stimulus_start - self.stop_time
         if after > 0.0 and after > max_after:
-            logging.warning(f"stimulus.trace_data after {np.round(after, 5)} is too large! after is set to next stimulus time - stimulus stop time {np.round(max_after, 5)}!")
+            log.warning(f"stimulus.trace_data after {np.round(after, 5)} is too large! after is set to next stimulus time - stimulus stop time {np.round(max_after, 5)}!")
             after = max_after
 
         return self._trace_data(name, before, after, reference)
@@ -221,7 +222,7 @@ class Stimulus(TraceContainer):
             The DataLink object.
         """
         if self.start_time >= self.stop_time:
-            logging.warning(f"Creating DataLink object for stimulus {self.name} fails because stimulus start time {self.start_time} is >= stimulus stop time {self.stop_time}!")
+            log.warning(f"Creating DataLink object for stimulus {self.name} fails because stimulus start time {self.start_time} is >= stimulus stop time {self.stop_time}!")
             return None
         dataset = self._tag._parent.name + ".nix"
         block_id = self._tag._parent.id

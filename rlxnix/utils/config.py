@@ -1,10 +1,13 @@
-import os
-import logging
 import json
+import logging
+import os
 from enum import Enum, auto
+
 from IPython import embed
 
 from .buffers import Singleton
+
+log = logging.getLogger(__name__)
 
 
 class Configuration(Enum):
@@ -14,27 +17,27 @@ class Configuration(Enum):
 
 
 class Config(metaclass=Singleton):
-    """
-    
-    
-    """
+    """ """
+
     trace_configuration_name = "trace_configs"
     log_level_name = "log_level"
 
     def __init__(self) -> None:
         super().__init__()
-        logging.debug("Init Config!")
+        log.debug("Init Config!")
         self._default_config = {}
         self._local_config = {}
         self._read_default_config()
         self._read_local_config()
 
     def _read_default_config(self):
-        logging.debug("Config: default configurations")
+        log.debug("Config: default configurations")
         here = os.path.dirname(__file__)
         config_file_name = os.path.join(here, "default_config.json")
         if not os.path.exists(config_file_name):
-            logging.warning(f"rlxnix.Config: no default configuration found! {config_file_name}")
+            log.warning(
+                f"rlxnix.Config: no default configuration found! {config_file_name}"
+            )
             return
 
         with open(os.path.join(here, "default_config.json")) as config_file:
@@ -42,7 +45,7 @@ class Config(metaclass=Singleton):
         self._default_config = infodict
 
     def _read_local_config(self):
-        logging.debug("Config: Read local configurations!")
+        log.debug("Config: Read local configurations!")
         local = os.getcwd()
         config_file_name = os.path.join(local, "config.json")
         if os.path.exists(config_file_name):
@@ -50,13 +53,17 @@ class Config(metaclass=Singleton):
                 local_config = json.load(config_file)
             self._local_config = local_config
         else:
-            logging.info(f"rlxnix.Config: no local configuration found! {config_file_name}")
+            log.info(
+                f"rlxnix.Config: no local configuration found! {config_file_name}"
+            )
 
     def _get_trace_config(self, config_dict, plugin, signal=None):
         if self.trace_configuration_name in config_dict.keys():
             c_dict = config_dict[self.trace_configuration_name]
             if plugin in c_dict:
-                logging.debug(f"Config found key {plugin} in config {plugin in c_dict}!")
+                log.debug(
+                    f"Config found key {plugin} in config {plugin in c_dict}!"
+                )
                 cfg = c_dict.get(plugin, None)
                 if cfg is not None:
                     if signal is not None:
@@ -98,6 +105,9 @@ class Config(metaclass=Singleton):
         ll = None
         if config_type == Configuration.Local or config_type == Configuration.Automatic:
             ll = self._get_log_level(self._local_config)
-        if ll is None and (config_type == Configuration.Automatic or config_type == Configuration.Default):
+        if ll is None and (
+            config_type == Configuration.Automatic
+            or config_type == Configuration.Default
+        ):
             ll = self._get_log_level(self._default_config)
         return ll

@@ -15,6 +15,8 @@ from .utils.util import data_links_to_pandas, nix_metadata_to_dict
 from .utils.data_trace import DataTrace, TraceList
 from .utils.buffers import MetadataBuffer, FeatureBuffer
 
+log = logging.getLogger(__name__)
+
 
 def scan_plugins():
     repro_map = {}
@@ -61,16 +63,16 @@ class Dataset(object):
         super().__init__()
         self._nixfile = None
         if not os.path.exists(filename):
-            logging.error("rlxnix cannot read file %s, does not exist!" % filename)
+            log.error("rlxnix cannot read file %s, does not exist!" % filename)
             raise ValueError("RelacsNIX cannot read file %s, does not exist!" % filename)
-        logging.info(f"Dataset: opening nix file {filename}")
+        log.info(f"Dataset: opening nix file {filename}")
         self._filename = filename
         self._nixfile = nixio.File.open(filename, nixio.FileMode.ReadOnly)
         weakref.finalize(self._nixfile, self.close)
         self._block = self._nixfile.blocks[0]
         if "relacs-nix version" in self._block.metadata:
             self._relacs_nix_version = self._block.metadata["relacs-nix version"]
-            logging.info(f"Relacs nix version is {self._relacs_nix_version}")
+            log.info(f"Relacs nix version is {self._relacs_nix_version}")
         else:
             self._relacs_nix_version = 1.0
         self._baseline_data = []
@@ -84,14 +86,14 @@ class Dataset(object):
         self._scan_file()
 
     def _scan_stimuli(self):
-        for k in tqdm(self._repro_map.keys(), disable=not(logging.root.level == logging.INFO)):
+        for k in tqdm(self._repro_map.keys(), disable=not(log.root.level == log.INFO)):
             r = self._repro_map[k]
             stimulus_start = r.start_time
             stimulus_stop = r.start_time + r.duration
             stimulus_names, stimulus_indices, stimulus_starts, stimulus_stops = self._timeline.find_stimuli(stimulus_start, stimulus_stop)
             for name, index, start, stop in zip(stimulus_names, stimulus_indices, stimulus_starts, stimulus_stops):
                 if start >= stop:
-                    logging.info(f"Dataset: not creating stimulus for stimulus {name} because start time ({start}) is >= stop time ({stop})!")
+                    log.info(f"Dataset: not creating stimulus for stimulus {name} because start time ({start}) is >= stop time ({stop})!")
                     continue
                 mt = self._block.multi_tags[name]
                 next_stimulus_start = self._timeline.next_stimulus_start(stop)
@@ -99,7 +101,7 @@ class Dataset(object):
                 r.add_stimulus(s)
 
     def _scan_repros(self):
-        for tag in tqdm(self._block.tags, disable=not(logging.root.level == logging.INFO)):
+        for tag in tqdm(self._block.tags, disable=not(log.root.level == log.INFO)):
             if "relacs.repro_run" not in tag.type:
                 continue
             if "RePro" in tag.metadata.sections[0]:
@@ -133,15 +135,15 @@ class Dataset(object):
                 continue
 
     def _scan_file(self):
-        logging.info(f"Scanning file {self.name}")
+        log.info(f"Scanning file {self.name}")
         self._scan_traces()
-        logging.info("Searching repro runs...")
+        log.info("Searching repro runs...")
         self._scan_repros()
-        logging.info(f"Creating timeline ...")
+        log.info(f"Creating timeline ...")
         self._timeline = Timeline(self.name, self._repro_map, self._block.multi_tags, self._relacs_nix_version)
-        logging.info("Sorting stimuli...")
+        log.info("Sorting stimuli...")
         self._scan_stimuli()
-        logging.info("...done")
+        log.info("...done")
 
     @property
     def repros(self) -> list:
@@ -191,7 +193,7 @@ class Dataset(object):
             List of RePro class instances that match the repro_name. If repro_name is not given, all repro runs are returned. May be empty.
         """
         def not_found_error(name, exact):
-            logging.debug(f"No repro run with the name {name} found with exact={exact}")
+            log.debug(f"No repro run with the name {name} found with exact={exact}")
 
         matches = []
         if not repro_name:

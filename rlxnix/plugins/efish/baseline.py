@@ -3,6 +3,7 @@ import numpy as np
 
 from .efish_ephys_repro import EfishEphys
 
+log = logging.getLogger(__name__)
 
 class Baseline(EfishEphys):
     """Represents the run of the Baseline repro of the efish plugin-set.
@@ -36,7 +37,7 @@ class Baseline(EfishEphys):
         """
         spikes = self.spikes()
         if spikes is None or len(spikes) == 0:
-            logging.warn("There are no baseline spikes")
+            log.warn("There are no baseline spikes")
             return 0.0
         isis = np.diff(spikes)
         return np.std(isis) / np.mean(isis)
@@ -51,7 +52,7 @@ class Baseline(EfishEphys):
             the eod frequency in Hz, None if the eod times are not stored in the file.
         """
         if "eod times" not in self._signal_trace_map:
-            logging.warning("EOD times are not stored in the file. You need to detect the eod times manually... ")
+            log.warning("EOD times are not stored in the file. You need to detect the eod times manually... ")
             return None
         return len(self.eod_times()) / self._duration
 

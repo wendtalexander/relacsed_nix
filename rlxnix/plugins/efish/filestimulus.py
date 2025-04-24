@@ -8,6 +8,7 @@ from scipy.interpolate import interp1d
 from .efish_ephys_repro import EfishEphys
 from ...utils.util import convert_path
 
+log = logging.getLogger("__name__")
 
 class FileStimulus(EfishEphys):
     _repro_name = "FileStimulus"
@@ -22,18 +23,18 @@ class FileStimulus(EfishEphys):
 
     @stimulus_folder.setter
     def stimulus_folder(self, new_location):
-        logging.debug(f"FileStimulus: setting stimulus folder to {new_location}.")
+        log.debug(f"FileStimulus: setting stimulus folder to {new_location}.")
         if os.path.exists(new_location):
             self._stimulus_folder = new_location
         else:
-            logging.error(f"FileStimulus: new stimulus folder ({new_location}) does not exist!")
+            log.error(f"FileStimulus: new stimulus folder ({new_location}) does not exist!")
 
     @property
     def contrast(self):
         # in _mapping_version <= 1.1 this is part of the repro, in future versions the contrast information may move to the features...
         c = 0.0
         unit = ""
-        logging.debug("Filestimulus: trying to read contrast from metadata")
+        log.debug("Filestimulus: trying to read contrast from metadata")
         if "RePro-Info" not in self.metadata:
             settings = self.repro_tag.metadata.find_sections(lambda s: s.type == "settings")
             if len(settings) > 0:
@@ -53,13 +54,13 @@ class FileStimulus(EfishEphys):
                 c = vals[0]
                 unit = unit.strip()
         else:
-            logging.error("Filestimulus.contrast: could not find the contrast property!")
+            log.error("Filestimulus.contrast: could not find the contrast property!")
         return c, unit
 
     @property
     def stimulus_filename(self):
         name = None
-        logging.debug("Filestimulus: trying to read stimulus file from metadata")
+        log.debug("Filestimulus: trying to read stimulus file from metadata")
         if "RePro-Info" not in self.metadata:
             settings = self.repro_tag.metadata.find_sections(lambda s: s.type == "settings")
             if len(settings) > 0:
@@ -67,7 +68,7 @@ class FileStimulus(EfishEphys):
         elif "file" in self.metadata["RePro-Info"]["settings"]:
             name = self.metadata["RePro-Info"]["settings"]["file"][0][0]
         else:
-            logging.error("Filestimulus.stimulus_filename: could not find the stimulus file property!")
+            log.error("Filestimulus.stimulus_filename: could not find the stimulus file property!")
         return name
 
     def _read_stimulus_file(self, filename):
@@ -158,7 +159,7 @@ class FileStimulus(EfishEphys):
         """
         self._check_stimulus(stimulus_index=stimulus_index)
         if self._stimulus_folder is None or not os.path.exists(self._stimulus_folder):
-            logging.error(f"FileStimulus: Stimulus folder is not set or not accessible! {self._stimulus_folder}")
+            log.error(f"FileStimulus: Stimulus folder is not set or not accessible! {self._stimulus_folder}")
             return None, None
 
         stim_name = self.stimulus_filename
@@ -169,11 +170,11 @@ class FileStimulus(EfishEphys):
 
         full_file = os.sep.join([self._stimulus_folder, stim_file])
         if not os.path.exists(full_file) or not os.path.isfile(full_file):
-            logging.error(f"FileStimulus: Stimulus file {full_file} does not exist")
+            log.error(f"FileStimulus: Stimulus file {full_file} does not exist")
             return None, None
 
         s = self._read_stimulus_file(full_file)
-        logging.debug("Filestimulus: successfully parsed stimulus file {full_file}")
+        log.debug("Filestimulus: successfully parsed stimulus file {full_file}")
 
         stimulus = self.stimuli[stimulus_index]
         stim_duration = stimulus.duration

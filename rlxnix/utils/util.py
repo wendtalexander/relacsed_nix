@@ -1,10 +1,13 @@
-import os
 import json
 import logging
+import os
+
 import numpy as np
 import pandas as pd
-
 from tqdm import tqdm
+
+log = logging.getLogger(__name__)
+
 
 def nix_metadata_to_dict(section):
     info = {}
@@ -15,7 +18,7 @@ def nix_metadata_to_dict(section):
     return info
 
 
-def np_encoder(object : np.generic):
+def np_encoder(object: np.generic):
     """Makes sure to properly convert numpy types for the json dump
 
     Parameters
@@ -32,7 +35,7 @@ def np_encoder(object : np.generic):
         return object.item()
 
 
-def metadata_to_json(metadata_dict: dict)->str:
+def metadata_to_json(metadata_dict: dict) -> str:
     """Dumps a dictionary to json
 
     Parameters
@@ -80,9 +83,6 @@ def data_links_to_pandas(data_links) -> pd.DataFrame:
         The DataFrame
     """
     df_list = []
-    for dl in tqdm(data_links, disable=not(logging.root.level == logging.INFO)):
+    for dl in tqdm(data_links, disable=not (log.root.level == logging.INFO)):
         df_list.append(dl.to_pandas())
     return pd.concat(df_list, ignore_index=True)
-
-
-

@@ -2,6 +2,7 @@ import logging
 
 from .mappings import DataType, type_map
 
+log = logging.getLogger(__name__)
 
 class DataTrace(object):
     """The DataTrace class represents a recorded data trace. The trace_type property holds whether the trace is an event or a continuously sampled trace. It further keeps the maximum number of samples and the maximum time information. It further provides access to the underlying nixio.DataArray.
@@ -95,7 +96,7 @@ class DataTrace(object):
             The sampling interval in seconds.
         """
         if self.trace_type == DataType.Event:
-            logging.warning("DataTrace: sampling interval makes no sense for event traces!")
+            log.warning("DataTrace: sampling interval makes no sense for event traces!")
         return self._sampling_interval
 
     def __str__(self) -> str:

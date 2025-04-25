@@ -15,11 +15,21 @@ class DataTrace(object):
         t = data_array.type
         if (event_type not in t) and (continuous_type not in t):
             raise ValueError(f"DataTrace not valid to dataArrray of type {data_array.type}!")
+
+        check_event_type = any([True if t in data_array.type else False for t in event_type])
+        check_continous_type = any([True if t in data_array.type  else False for t in continuous_type])
+        if not check_event_type and not check_continous_type:
+            raise ValueError(
+                f"DataTrace not valid to Data Arrray of type {data_array.type}!"
+            )
+
         self._data_array = data_array
         self._name = data_array.name
         self._id = data_array.id
         self._type = data_array.type
-        self._trace_type = DataType.Continuous if continuous_type in data_array.type else DataType.Event
+        self._trace_type = (
+            DataType.Continuous if check_continous_type else DataType.Event
+        )
         self._shape = data_array.shape
         self._sampling_interval = None
         if self._trace_type == DataType.Event:

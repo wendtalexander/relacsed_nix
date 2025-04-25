@@ -1,7 +1,6 @@
 from enum import Enum
 
 import nixio
-import nixio
 
 
 class DataType(Enum):

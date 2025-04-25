@@ -8,13 +8,14 @@ class DataType(Enum):
       Event = 1
       StimulusSegment = 2
 
-
 type_map = {1.0: {DataType.Event: "nix.events.position",
                   DataType.Continuous: "nix.data.sampled",
                   DataType.StimulusSegment: "nix.event.stimulus"},
-            1.1: {DataType.Event: "relacs.data.event",
-                  DataType.Continuous: "relacs.data.sampled",
-                  DataType.StimulusSegment: "relacs.stimulus"}
+
+            1.1:
+                 {DataType.Event: ["relacs.data.events" ,"open-ephys.data.events"],
+                  DataType.Continuous: ["relacs.data.sampled","open-ephys.data.sampled"],
+                  DataType.StimulusSegment: ["relacs.stimulus", "open-ephys.stimulus"]},
             }
 
 

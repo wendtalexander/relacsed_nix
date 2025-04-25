@@ -125,10 +125,13 @@ class Dataset(object):
         continuous_type = type_map[self._relacs_nix_version][DataType.Continuous]
 
         for da in self._block.data_arrays:
-            if event_type in da.type:
+            check_event_type = any([True if t in da.type else False for t in event_type ])
+            check_continous_type = any([True if t in da.type else False for t in continuous_type])
+
+            if check_event_type:
                 self._event_traces.append(DataTrace(da, self._relacs_nix_version))
                 self._trace_map[self.event_traces[-1].name] = self._event_traces[-1]
-            elif continuous_type in da.type:
+            elif check_continous_type:
                 self._data_traces.append(DataTrace(da, self._relacs_nix_version))
                 self._trace_map[self.data_traces[-1].name] = self._data_traces[-1]
             else:

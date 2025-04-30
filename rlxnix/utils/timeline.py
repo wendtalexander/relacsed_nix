@@ -68,8 +68,9 @@ class Timeline(object):
         self._stim_indices = np.zeros_like(self._stim_start_times, dtype=int)
         index = 0
         for mt in mtags:
-            if stimulus_type not in mt.type:
-                log.warn(
+            is_stimulus_type = any([True if t in mt.type else False for t in stimulus_type])
+            if not is_stimulus_type:
+                log.warning(
                     f"MultiTag type {mt.type} of mt {mt.name} does not match {stimulus_type}"
                 )
                 continue

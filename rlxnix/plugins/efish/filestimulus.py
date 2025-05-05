@@ -69,6 +69,8 @@ class FileStimulus(EfishEphys):
             name = self.metadata["RePro-Info"]["settings"]["file"][0][0]
         else:
             log.error("Filestimulus.stimulus_filename: could not find the stimulus file property!")
+        if isinstance(name, list) and len(name) > 0:
+            name = name[0]
         return name
 
     def _read_stimulus_file(self, filename):

@@ -3,11 +3,11 @@
     "trace_configs" : {
         "efish": {
             "spikes": ["Spikes", "Spikes-1", "Spikes-2", "spikes-1", "spikes"],
-            "membrane voltage": ["V", "V-1", "V-2"],
-            "global eod": ["EOD"],
-            "local eod": ["LocalEOD", "LocalEOD-1", "LocalEOD-2"],
+            "membrane voltage": ["V", "V-1", "V-2", "processed_data"],
+            "global eod": ["EOD", "global-eod"],
+            "local eod": ["LocalEOD", "LocalEOD-1", "LocalEOD-2", "local-eod"],
             "eod times": ["EOD events", "EOD_events"],
-            "stimulus": ["GlobalEFieldStimulus"],
+            "stimulus": ["GlobalEFieldStimulus", "stimulus"],
             "chirps": ["Chirps", "Chirps-1", "Chirps-2"]
         },
         "default": {
